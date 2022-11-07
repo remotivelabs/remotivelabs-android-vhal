@@ -46,7 +46,7 @@ m android.hardware.automotive.audiocontrol@1.0-service android.hardware.automoti
 
 Put the code in for example: `aaos_on_phone/vendor/remotivelabs/grpc-service`, like so:
 ```
-~/aaos_on_phone/vendor/remotivelabs/grpc-service$ cp -r ~/remotivelabs-android-vhal .
+~/aaos_on_phone/vendor/remotivelabs/grpc-service$ cp -r ~/remotivelabs-android-vhal/* .
 ```
 
 Unless already done you should do:
