@@ -21,36 +21,37 @@ using ::android::hardware::automotive::vehicle::V2_0::VehiclePropValue;
 using namespace grpc;
 using namespace base;
 
-std::map<std::string, int> signalMap
-  {
-   {"ChassisSteeringwheelAngle", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
-     // This is not visible in kitchensinkapp so map DI_uiSpeed to PERF_VEHICLE_SPEED
-     //{"DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY)},
-   {"VehicleSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
-  };
+std::map<std::string, int> signalMap{
+    {"ChassisSteeringwheelAngle", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
+    // This is not visible in kitchensinkapp so map DI_uiSpeed to PERF_VEHICLE_SPEED
+    //{"DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY)},
+    {"VehicleSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
+};
 
-GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<bool>* shutdown) 
+GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<bool> *shutdown)
     : stub(NetworkService::NewStub(channel))
+{
+  source = std::make_unique<ClientId>();
+  name_space = std::make_unique<NameSpace>();
+  source->set_id("my_unique_client_id");
+  name_space->set_name("custom_can");
+  this->shutdown = shutdown;
+
+  subscriber();
+}
+
+GrpcConnection::~GrpcConnection()
+{
+  if (mSubscriber.joinable())
   {
-    source = std::make_unique<ClientId>();
-    name_space = std::make_unique<NameSpace>();
-    source->set_id("my_unique_client_id");
-    name_space->set_name("custom_can");
-    this->shutdown = shutdown;
-
-    subscriber();
-  }
-
-GrpcConnection::~GrpcConnection() {
-  if (mSubscriber.joinable()) {
     mSubscriber.join();
   }
 }
 
-
-int writePropvalue(int signal, float value, uint timestamp, SocketConnection* s) {
+int writePropvalue(int signal, float value, uint timestamp, SocketConnection *s)
+{
   vhal_proto::EmulatorMessage msg;
-  vhal_proto::VehiclePropValue* pValue = msg.add_value();
+  vhal_proto::VehiclePropValue *pValue = msg.add_value();
   pValue->set_prop(signal);
   pValue->add_float_values(value);
   pValue->set_status(vhal_proto::AVAILABLE);
@@ -59,7 +60,8 @@ int writePropvalue(int signal, float value, uint timestamp, SocketConnection* s)
 
   int numBytes = msg.ByteSize();
   std::vector<uint8_t> buffer(static_cast<size_t>(numBytes));
-  if (!msg.SerializeToArray(buffer.data(), numBytes)) {
+  if (!msg.SerializeToArray(buffer.data(), numBytes))
+  {
     LOG(ERROR) << __func__ << "SerializeToString failed!";
     return -1;
   }
@@ -67,16 +69,21 @@ int writePropvalue(int signal, float value, uint timestamp, SocketConnection* s)
 
   std::vector<uint8_t> read_buffer;
   read_buffer = s->read();
-  if (read_buffer.size() == 0) {
-    LOG(ERROR) << __func__ <<"Read returned empty message";
+  if (read_buffer.size() == 0)
+  {
+    LOG(ERROR) << __func__ << "Read returned empty message";
     return -1;
   }
 
   vhal_proto::EmulatorMessage respMsg;
-  if (respMsg.ParseFromArray(read_buffer.data(), static_cast<int32_t>(read_buffer.size()))) {
-    if (respMsg.status() == vhal_proto::RESULT_OK) {
+  if (respMsg.ParseFromArray(read_buffer.data(), static_cast<int32_t>(read_buffer.size())))
+  {
+    if (respMsg.status() == vhal_proto::RESULT_OK)
+    {
       return 0;
-    } else {
+    }
+    else
+    {
       LOG(ERROR) << __func__ << " Not expected response type=" << respMsg.msg_type() << " status=" << respMsg.status();
     }
   }
@@ -84,8 +91,10 @@ int writePropvalue(int signal, float value, uint timestamp, SocketConnection* s)
   return -1;
 }
 
-void GrpcConnection::subscriber() {
-    mSubscriber = std::thread([this]() {
+void GrpcConnection::subscriber()
+{
+  mSubscriber = std::thread([this]()
+                            {
       auto signals = new SignalIds();
       // add any number of signals...
       {
@@ -121,39 +130,38 @@ void GrpcConnection::subscriber() {
 
       while (reader->Read(&signalsreturned)){
 
-	if (*shutdown == true) {
-	  LOG(INFO) << "Exit reader";
-	  ctx.TryCancel();
-	  break;
-	}
+        if (*shutdown == true) {
+          LOG(INFO) << "Exit reader";
+          ctx.TryCancel();
+          break;
+        }
 
         for (int i = 0; i < signalsreturned.signal_size(); i++){
           auto name = signalsreturned.signal(i).id().name();
           int propId = signalMap.at(name);
           switch (propId) {
           case toInt(VehicleProperty::PERF_STEERING_ANGLE):
-	    LOG(INFO) << "Got signal " << propId << " " << name << " : " << signalsreturned.signal(i).double_();
+            LOG(INFO) << "Got signal " << propId << " " << name << " : " << signalsreturned.signal(i).double_();
             writePropvalue(propId, (float)signalsreturned.signal(i).double_(),
                            signalsreturned.signal(i).timestamp(), socket);
             break;
           case toInt(VehicleProperty::PERF_VEHICLE_SPEED):
-	  case toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY):
-	    LOG(INFO) << "Got signal " << propId << " " << name << " : " << signalsreturned.signal(i).integer();
+          case toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY):
+            LOG(INFO) << "Got signal " << propId << " " << name << " : " << signalsreturned.signal(i).integer();
             writePropvalue(propId, (float)signalsreturned.signal(i).integer(),
                            signalsreturned.signal(i).timestamp(), socket);
-	    break;
+            break;
           default:
             LOG(ERROR) << __func__ <<" Not supporting prop id " << propId;
           }
         }
       }
+      
       LOG(INFO) << "Subscribing end. Subscribing on invalid signals or stream stopped.";
 
       Status status = reader->Finish();
 
       socket->close();
 
-      LOG(INFO) << "Exit " <<__func__;
-   });
+      LOG(INFO) << "Exit " <<__func__; });
 }
-
