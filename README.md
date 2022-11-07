@@ -40,13 +40,13 @@ m
 m android.hardware.automotive.audiocontrol@1.0-service android.hardware.automotive.vehicle@2.0-service
 ```
 
->Swedish :) Vad gäller flashning hoppas jag ni kan följa deras guide, annars får ni höra av er. Dock bootar det inte till homescreen efter jag flashat med fastboot, men adb root, remount och sync fungerar. Efter automotive binärerna är på plats bootar det till homescreen.
+>Flashing can be tricky even if following the guide. When using fastboot it doesn't go to homescreen, however, `adb root`, `adb remount` and `adb sync` works. Once the automotive binaries are in place it does boot properly to homescreen
 
 ## Build and replace grpc-service
 
 Put the code in for example: `aaos_on_phone/vendor/remotivelabs/grpc-service`, like so:
 ```
-~/aaos_on_phone/vendor/remotivelabs$ cp -r ~/remotivelabs-samples/integrations/android-vhal/grpc-service .
+~/aaos_on_phone/vendor/remotivelabs/grpc-service$ cp -r ~/remotivelabs-android-vhal .
 ```
 
 Unless already done you should do:
