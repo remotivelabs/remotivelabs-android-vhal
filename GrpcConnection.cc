@@ -23,10 +23,10 @@ using namespace base;
 
 std::map<std::string, int> signalMap
   {
-   {"SteeringAngle129", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
+   {"ChassisSteeringwheelAngle", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
      // This is not visible in kitchensinkapp so map DI_uiSpeed to PERF_VEHICLE_SPEED
      //{"DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY)},
-   {"DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
+   {"VehicleSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
   };
 
 GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<bool>* shutdown) 
@@ -35,7 +35,7 @@ GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<boo
     source = std::make_unique<ClientId>();
     name_space = std::make_unique<NameSpace>();
     source->set_id("my_unique_client_id");
-    name_space->set_name("ChassiBus");
+    name_space->set_name("custom_can");
     this->shutdown = shutdown;
 
     subscriber();
@@ -147,6 +147,7 @@ void GrpcConnection::subscriber() {
           }
         }
       }
+      LOG(INFO) << "Subscribing end. Subscribing on invalid signals or stream stopped.";
 
       Status status = reader->Finish();
 
