@@ -1,0 +1,114 @@
+
+cc_library_static {
+    name: "grpc-remotivelabs",
+    include_dirs: [
+        "external/protobuf/src",
+    ],
+    generated_headers: [
+    	"DefaultVehicleHalProtoStub_h",
+    	"CommonProtoStub_h",
+        "NetworkProtoStub_h",
+    ],
+    export_generated_headers: [
+    	"DefaultVehicleHalProtoStub_h",
+        "CommonProtoStub_h",
+        "NetworkProtoStub_h",
+    ],
+    generated_sources: [
+    	"DefaultVehicleHalProtoStub_cc",
+        "CommonProtoStub_cc",
+        "NetworkProtoStub_cc",
+    ],
+    shared_libs: [
+        "libgrpc++",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
+}
+
+genrule {
+    name: "CommonProtoStub_h",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/common.proto",
+    ],
+    out: [
+        "common.pb.h",
+        "common.grpc.pb.h",
+    ],
+}
+
+genrule {
+    name: "NetworkProtoStub_h",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/network_api.proto",
+    ],
+    out: [
+        "network_api.pb.h",
+        "network_api.grpc.pb.h",
+    ],
+}
+
+genrule {
+    name: "CommonProtoStub_cc",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/common.proto",
+    ],
+    out: [
+        "common.pb.cc",
+        "common.grpc.pb.cc",
+    ],
+}
+
+genrule {
+    name: "NetworkProtoStub_cc",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/network_api.proto",
+    ],
+    out: [
+        "network_api.pb.cc",
+        "network_api.grpc.pb.cc",
+    ],
+}
+
+cc_binary {
+    name: "grpc-service",
+    system_ext_specific: true,
+    srcs: [
+        "GrpcService.cpp",
+        "GrpcConnection.cc",
+        "SocketConnection.cpp"
+    ],
+    shared_libs: [
+        "libbase",
+        "libprotobuf-cpp-full",
+        "libgrpc++",
+        "android.hardware.automotive.vehicle@2.0",
+    ],
+    static_libs: [
+    	"grpc-remotivelabs",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
+}
