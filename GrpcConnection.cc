@@ -99,13 +99,13 @@ void GrpcConnection::subscriber()
       // add any number of signals...
       {
         auto handle = signals->add_signalid();
-        handle->set_allocated_name(new std::string("SteeringAngle129"));
+        handle->set_allocated_name(new std::string("ChassisSteeringwheelAngle"));
         handle->set_allocated_namespace_(new NameSpace(*name_space));
       }
 
       {
         auto handle = signals->add_signalid();
-        handle->set_allocated_name(new std::string("DI_uiSpeed"));
+        handle->set_allocated_name(new std::string("VehicleSpeed"));
         handle->set_allocated_namespace_(new NameSpace(*name_space));
       }
 
@@ -156,7 +156,7 @@ void GrpcConnection::subscriber()
           }
         }
       }
-      
+
       LOG(INFO) << "Subscribing end. Subscribing on invalid signals or stream stopped.";
 
       Status status = reader->Finish();
