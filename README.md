@@ -1,6 +1,6 @@
 # Set up and build android AAOS for Pixel 4a - stream on/offline data from remotiveLabs cloud
 
-This guide is basically a copy of https://source.android.com/docs/devices/automotive/start/pixelxl, but first new version of git and repo are fetched.
+The start of this guide is copy of https://source.android.com/docs/devices/automotive/start/pixelxl, with the addition of fething new version of git and repo.
 
 ```
 sudo add-apt-repository ppa:git-core/ppa
@@ -40,7 +40,31 @@ m
 m android.hardware.automotive.audiocontrol@1.0-service android.hardware.automotive.vehicle@2.0-service
 ```
 
+## Flash the device
+
+Follow the guide https://source.android.com/docs/devices/automotive/start/pixelxl
+
 >Flashing can be tricky even if following the guide. When using fastboot it doesn't go to homescreen, however, `adb root`, `adb remount` and `adb sync` works. Once the automotive binaries are in place it does boot properly to homescreen
+
+## Flash if binaries resides on a remote machine
+
+`Fastboot` is only avalible locally (unlike `adb`, se reference below), so if the build is made on a VM the binaries need to moved to a local machine which is connected to your android device. To transfer the bianries do the following
+```
+#build machine
+cd out/target/product/sunfish/
+zip ~/flash-data android-info.txt boot.img dtbo.img product.img super_empty.img system_ext.img system.img system_other.img vbmeta.img
+
+#scp to your local machine
+scp -r ...
+
+#flash from your local machine
+fastboot reboot-bootloader
+fastboot -w update update.zip
+
+#likely you need
+adb root && sleep 5 && adb remount && adb sync
+```
+
 
 ## Build and replace grpc-service
 
