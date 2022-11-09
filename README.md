@@ -1,4 +1,4 @@
-# Set up and build android AAOS for Pixel 4a - stream on/offline data from remotiveLabs cloud
+# Set up and build android AAOS for Pixel 4a - stream on/offline data from RemotiveLabs cloud
 
 The start of this guide is copy of https://source.android.com/docs/devices/automotive/start/pixelxl, with the addition of fething new version of git and repo.
 
