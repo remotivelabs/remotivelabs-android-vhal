@@ -1,52 +1,111 @@
+/** Data types for RemotiveBroker operations. */
+
 syntax = "proto3";
 
 package base;
 
+/// Symbolic message representing no argument needed or provided.
 message Empty {
 }
 
+/**
+ * Identifier for client. Used in subscribe and publish. Subscriptions will not
+ * receive updates from publish calls with the same ClientId.
+ */
 message ClientId {
-  string id = 1;
+  string id = 1; /// Identifier as string
 }
 
+/// Identifier for a signal.
 message SignalId {
-  string name = 1;
-  NameSpace namespace = 2;
+  string name = 1;          /// Name of signal.
+  NameSpace namespace = 2;  /// Which name space signal belongs in.
 }
 
+/// Information about a signal. Including name and all meta data fields.
 message SignalInfo {
   SignalId id = 1;
   MetaData metaData = 2;
 }
 
+/**
+ * Multiplexing information.
+ * Some signal databases allow "multiplexing" or "unions" in their frame
+ * information. IF a signal is in `select` mode, the value of the signal will
+ * act as a filter for signals which are in `filter` mode.
+ */
+message Multiplex {
+    oneof mode {
+        Empty none = 1;
+        Empty select = 2;
+        int32 filter = 3;
+    };
+}
+
+/// Supported E2E profiles.
+enum E2eProfile {
+    PROFILE_AR_01A = 0; /// Autosar 1A
+}
+
+/// Information about E2E configuration.
+message E2e {
+    E2eProfile profile = 1;             /// Profile.
+    uint32 dataId = 2;                  /// Data ID for CRC calculation.
+    string signalCrc = 3;               /// Name of signal for CRC field.
+    string signalCounter = 4;           /// Name of signal for counter field.
+}
+
+/// Group inside of frame.
+message Group {
+    uint32 start = 1;                   /// Byte offset in frame for group.
+    uint32 length = 2;                  /// Byte length of group.
+    E2e e2e = 3;                        /// E2E property for group.
+}
+
+/**
+ * Collection of all meta data for a signal.
+ *
+ * RemotiveBroker support several databases. The following attributes are read
+ * from the database running on the RemotiveBroker.
+ */
 message MetaData {
-  string description = 4;
-  int32 max = 5;
-  int32 min = 6;
-  string unit = 7;
-  int32 size = 8;
-  bool isRaw = 9;
+    string description = 4;             /// Description for signal.
+    float max = 12;                     /// Maximum allowed value.
+    float min = 13;                     /// Minimum allowed value.
+    string unit = 7;                    /// Unit of the signal value.
+    int32 size = 8;                     /// Size of signal value when packed in frame.
+    bool isRaw = 9;                     /// Is binary data?
+    double factor = 10;                 /// Multiplication faction used for encoding and decoding value in frame.
+    double offset = 11;                 /// Offset used for encoding and decoding value in frame.
+    repeated string sender = 14;        /// List of named senders of signals.
+    repeated string receiver = 15;      /// List of named receivers of signal.
+    float cycleTime = 16;               /// Cadence for sending signal in milliseconds.
+    float startValue = 17;              /// Initial value to use before publishing.
+    Multiplex multiplex = 18;           /// Frame multiplexing information.
+    E2e e2e = 19;                       /// E2e information about frame.
+    repeated Group groups = 20;         /// Groups inside frame.
+    uint32 frameId = 21;                /// Assosiated identification number for frame.
 }
 
+/// Identifier for a name space.
 message NameSpace {
-  string name = 1;
+  string name = 1; /// Name of name space, which in turn is typically redirected in interfaces.json to an electrical interface.
 }
 
-message Configuration {
-  repeated NetworkInfo networkInfo = 1;
-}
-
+/// Information about network
 message NetworkInfo {
-  NameSpace namespace = 1;
-  string type = 2;
-  string description = 3;
+  NameSpace namespace = 1;              /// Corresponding name space.
+  string type = 2;                      /// Type of network as text. Eg "can", "lin" etc.
+  string description = 3;               /// Description text about network.
 }
 
+/// Information about a frame and it's signals.
 message FrameInfo {
-  SignalInfo signalInfo = 1;
-  repeated SignalInfo childInfo = 2;
+  SignalInfo signalInfo = 1;            /// Information about the frame itself.
+  repeated SignalInfo childInfo = 2;    /// Information about signals included in frame.
 }
 
+/// Collection of information for several frames.
 message Frames {
-  repeated FrameInfo frame = 1;
+  repeated FrameInfo frame = 1;         /// List of information about frames.
 }

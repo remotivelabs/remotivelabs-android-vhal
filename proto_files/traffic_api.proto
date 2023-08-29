@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "common.proto";
+import "system_api.proto";
+
+package base;
+
+/// Handle playback and recordings.
+service TrafficService {
+  /// Play a playback or start recording.
+  rpc PlayTraffic (PlaybackInfos) returns (PlaybackInfos) {}
+  /// Get continious status of playback states.
+  rpc PlayTrafficStatus (Empty) returns (stream PlaybackInfos) {}
+}
+
+/// Modes of playback and recording.
+enum Mode {
+  PLAY = 0;         /// Playing a file.
+  PAUSE = 1;        /// Playback is paused.
+  STOP = 2;         /// Playback in stopped.
+  RECORD = 3;       /// Recording a playback.
+  SEEK = 4;         /// Seek to offset in a playback
+}
+
+/// Status of playback.
+message PlaybackMode {
+  /// Current status.
+  oneof status {
+      string errorMessage = 2;      /// Error reason.
+      string EOF = 3;               /// End of file; playback finished
+      Mode mode = 4;                /// Active with mode.
+    }
+  uint64 offsetTime = 5;            /// Current offset in micro seconds.
+  uint64 startTime = 6;             /// Start time in monotonic micro seconds.
+  uint64 endTime = 7;               /// End time in monotonic micro seconds.
+  int64 timeDeviation = 8;          /// Time deviation in micro seconds, measured by server.
+}
+
+/// Information about all playbacks and recordings.
+message PlaybackInfos {
+  /// List of all information.
+  repeated PlaybackInfo playbackInfo = 1;
+}
+
+/**
+ * Information about name space and file associated with playback or recording.
+ * Playback will play signals on namespace. Recordings will record all signals
+ * on name space.
+ */
+message PlaybackConfig {
+  FileDescription fileDescription = 1;  /// File information.
+  NameSpace namespace = 2;              /// Name space associated.
+}
+
+/// Information about a playback or a recording.
+message PlaybackInfo {
+  PlaybackConfig playbackConfig = 1;    /// File and name space information.
+  PlaybackMode playbackMode = 2;        /// Current mode.
+}
+
