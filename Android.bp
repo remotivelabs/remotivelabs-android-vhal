@@ -91,6 +91,22 @@ genrule {
     ],
 }
 
+genrule {
+    name: "NetworkProtoStub_cc",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/traffic_api.proto",
+    ],
+    out: [
+        "traffic_api.pb.cc",
+        "traffic_api.grpc.pb.cc",
+    ],
+}
+
 cc_binary {
     name: "grpc-service",
     system_ext_specific: true,
