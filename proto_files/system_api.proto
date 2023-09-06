@@ -61,7 +61,7 @@ message Configuration {
 message ReloadMessage {
     /// Status of reload operation.
     oneof status {
-        /// New configuration from successfull reload operation.
+        /// New configuration from successfully reload operation.
         Configuration configuration = 1;
         /// Response from failed reload operation.
         string errorMessage = 2;
@@ -93,7 +93,7 @@ message FileUploadRequest {
 
 /**
  * Request for file chunk upload.
- * Divide file in chunks of n bytes, where recommened n is 500000 bytes.
+ * Divide file in chunks of n bytes, where recommend n is 500000 bytes.
  * SHA256 which is part of FileDescription only needs to be submitted in the
  * last chunk.
  */

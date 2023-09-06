@@ -9,7 +9,7 @@ package base;
 service TrafficService {
   /// Play a playback or start recording.
   rpc PlayTraffic (PlaybackInfos) returns (PlaybackInfos) {}
-  /// Get continious status of playback states.
+  /// Get continuous status of playback states.
   rpc PlayTrafficStatus (Empty) returns (stream PlaybackInfos) {}
 }
 

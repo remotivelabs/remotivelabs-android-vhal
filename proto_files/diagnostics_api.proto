@@ -2,30 +2,55 @@ syntax = "proto3";
 
 import "common.proto";
 
-package base;
+package diagnostics;
 
 
-/**
- * Read data by service identifier
- *
- * Data identifiers:
- * - 0x22 read data by identinifier (Service id).
- * - 0x1f90 DID (Data identifier) for VIN number.
- */
 service DiagnosticsService {
-  /// Send diagnostics request
-  rpc SendDiagnosticsQuery (DiagnosticsRequest) returns (DiagnosticsResponse) {}
+  /// CAN MF sending.
+  rpc PublishMultiFrame (PublisherConfig) returns (base.Empty) {}
+  /// CAN MF Receiving.
+  rpc SubscribeMultiFrame (SubscriberConfig) returns (stream Payload) {}
 }
 
-/// Parameters for a diagnostics query
-message DiagnosticsRequest {
-  SignalId upLink = 1;          /// Signal for setting up link
-  SignalId downLink = 2;        /// Signal for closing link
-  bytes serviceId = 3;          /// Service identifier
-  bytes dataIdentifier = 4;     /// Data identifier
+message LinkTimers {
+  /**
+  * Max milliseconds waiting flow control or single frame before throwing maxRespTimeoutError. Defaults to 1000.
+  * Equivavlent to (N_As + N_Bs according to ISO-15765-2) for sender.
+  * Equivavlent to (N_Ar + N_Cr according to ISO-15765-2) for receiver.
+  */
+  int64 maxResponseTimeout = 3;
+  /**
+  * Enables testing of maxResponseTimeout by delaying millieseconds before responding to:
+  * received flow control with consecutive frame for sender (N_Cs according to ISO-15765-2).
+  * received first frame with flow control for receiver (N_Br according to ISO-15765-2).
+  * Defaults to 0.
+  */
+  int64 delayResponse = 4; 
 }
 
-/// Response from a diagnostics query
-message DiagnosticsResponse {
-  bytes raw = 5; /// Payload
+message PublisherConfig {
+  Link link = 1;
+  Payload payload = 2;
+  /** LinkTimers currently not supported **/
+  LinkTimers linkTimers = 3;
+}
+
+message SubscriberConfig {
+  Link link = 1;
+  /** LinkTimers currently not supported **/
+  LinkTimers linkTimers = 2;
+  /**
+  * Specify if the payload should be retured raw or decoded. Setting this to true will provide the raw repsonce without stipped headers and counters. Defaults to false.
+  */
+  bool rawPayload = 3;
+}
+
+message Payload {
+  bytes bytes = 1;
+}
+
+message Link {
+  base.ClientId clientId = 1;               /// Data identifier
+  base.SignalId publishSignal = 2;          /// Signal for setting up link
+  base.SignalId subscribeSignal = 3;        /// Signal for closing link
 }
