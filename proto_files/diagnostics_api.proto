@@ -50,7 +50,15 @@ message Payload {
 }
 
 message Link {
-  base.ClientId clientId = 1;               /// Data identifier
-  base.SignalId publishSignal = 2;          /// Signal for setting up link
-  base.SignalId subscribeSignal = 3;        /// Signal for closing link
+   /**
+   * Identifier of subscriber, typically your app identifier. Published signals
+   * with same identifier will not trigger callback.
+   */
+  base.ClientId clientId = 1;    
+   /**
+   * Uplink for intended target
+   * This is optional for SubscribeMultiFrame, not setting this will effectively result in sniff_mode, where no control frames are sent.
+   */
+  base.SignalId publishSignal = 2;          /// Uplink for intended target
+  base.SignalId subscribeSignal = 3;        /// Downlink where response is expected
 }
