@@ -10,6 +10,8 @@ service NetworkService {
   rpc SubscribeToSignals (SubscriberConfig) returns (stream Signals) {}
   /// Subscribe to signals with transform provided as a LUA script.
   rpc SubscribeToSignalWithScript (SubscriberWithScriptConfig) returns (stream Signals) {}
+  /// A stream which emits frames distributions of a provided namespace. Useful for diagnostic purposes. Counts are reset every 500 ms.
+  rpc SubscribeToFramesDistribution (FramesDistributionConfig) returns (stream FramesDistribution) {}
   /// Publish signals with values.
   rpc PublishSignals (PublisherConfig) returns (Empty) {}
   /// Read signals from cache.
@@ -39,6 +41,20 @@ message SubscriberWithScriptConfig {
   bytes script = 2;
   /// Only trigger callback when value changes when set to true.
   bool onChange = 3;
+}
+
+message FramesDistributionConfig {
+  /// Name of the namespace from which we wish to subscribe to frames distributions.
+  NameSpace namespace = 1;
+}
+
+message CountByFrameId {
+  uint32 frameId = 1;
+  uint64 count = 2;
+}
+
+message FramesDistribution {
+  repeated CountByFrameId countsByFrameId = 1;
 }
 
 /// List of signal identifiers

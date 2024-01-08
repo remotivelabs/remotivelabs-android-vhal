@@ -41,6 +41,9 @@ service SystemService {
 
     /// Set server license.
     rpc SetLicense (License) returns (LicenseInfo) {}
+
+    /// Sets a custom property, such as SecOc parameters
+    rpc SetProperty (PropertyValue) returns (Empty) {}
 }
 
 /// Configuration of server.
@@ -165,4 +168,14 @@ message LicenseInfo {
 message License {
   bytes data = 1;                   /// Content of license.
   bool termsAgreement = 2;          /// Check if user accepted user agreement.
+}
+
+message PropertyValue {
+  string name = 1;                  /// Example name: "secoc_key", "secoc_fv"
+  repeated string scope = 2;        /// Example input: [<namespace>, <keyId>] or [<namespace>, <profile>]
+  oneof value {
+     bytes raw = 3;
+     int64 integer = 4;
+     double double = 5;
+ }
 }
