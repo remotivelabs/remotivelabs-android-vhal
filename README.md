@@ -98,8 +98,14 @@ Make sure the network is available
 Start the `grpc-service`:
 
 ```
-adb shell /system_ext/bin/grpc-service vhal-robert-beamydemo2-jnjbmq2tja-ez.a.run.app API_KEY
+adb shell /system_ext/bin/grpc-service YOUR_BROKER_URL API_KEY
 ```
+
+Ensure that `YOUR_BROKER_URL` matches your broker's URL, for example, `android-vhal-demo-jnjbmq2tja-ez.a.run.app`,
+which is located on the Broker Details page when using Remotive Cloud. The `API_KEY` can also be found on this page.
+If you are running the broker outside of Remotive Cloud, open the Remotive Broker App and look for the URL in the bottom
+left corner. Click on it to reveal both the URL and the API KEY.
+
 Make sure the credentials match, go to the `cloud.remotivelabs.com`, and start the recording, click play.
 
 To see output in log
