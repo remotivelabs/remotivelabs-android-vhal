@@ -22,10 +22,8 @@ using namespace grpc;
 using namespace base;
 
 std::map<std::string, int> signalMap{
-    {"ChassisSteeringwheelAngle", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
-    // This is not visible in kitchensinkapp so map DI_uiSpeed to PERF_VEHICLE_SPEED
-    //{"DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED_DISPLAY)},
-    {"VehicleSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
+    {"ID129SteeringAngle.SteeringAngle129", toInt(VehicleProperty::PERF_STEERING_ANGLE)},
+    {"ID257DIspeed.DI_uiSpeed", toInt(VehicleProperty::PERF_VEHICLE_SPEED)},
 };
 
 GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<bool> *shutdown)
@@ -34,7 +32,7 @@ GrpcConnection::GrpcConnection(std::shared_ptr<Channel> channel, std::atomic<boo
   source = std::make_unique<ClientId>();
   name_space = std::make_unique<NameSpace>();
   source->set_id("my_unique_client_id");
-  name_space->set_name("custom_can");
+  name_space->set_name("VehicleBus");
   this->shutdown = shutdown;
 
   subscriber();
@@ -99,13 +97,13 @@ void GrpcConnection::subscriber()
       // add any number of signals...
       {
         auto handle = signals->add_signalid();
-        handle->set_allocated_name(new std::string("ChassisSteeringwheelAngle"));
+        handle->set_allocated_name(new std::string("ID129SteeringAngle.SteeringAngle129"));
         handle->set_allocated_namespace_(new NameSpace(*name_space));
       }
 
       {
         auto handle = signals->add_signalid();
-        handle->set_allocated_name(new std::string("VehicleSpeed"));
+        handle->set_allocated_name(new std::string("ID257DIspeed.DI_uiSpeed"));
         handle->set_allocated_namespace_(new NameSpace(*name_space));
       }
 
