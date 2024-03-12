@@ -33,6 +33,10 @@ message PublisherConfig {
   Payload payload = 2;
   /** LinkTimers currently not supported **/
   LinkTimers linkTimers = 3;
+  /**
+  * Used for padding outgoing requests, this is optional. Set to true to remove padding.
+  */
+  bool noPadding = 4;
 }
 
 message SubscriberConfig {
@@ -43,6 +47,10 @@ message SubscriberConfig {
   * Specify if the payload should be retured raw or decoded. Setting this to true will provide the raw repsonce without stipped headers and counters. Defaults to false.
   */
   bool rawPayload = 3;
+  /**
+  * Used for padding outgoing requests, this is optional. Set to true to remove padding.
+  */
+  bool noPadding = 4;
 }
 
 message Payload {
