@@ -26,14 +26,15 @@ enum Mode {
 message PlaybackMode {
   /// Current status.
   oneof status {
-      string errorMessage = 2;      /// Error reason.
-      string EOF = 3;               /// End of file; playback finished
-      Mode mode = 4;                /// Active with mode.
+      string errorMessage = 2;       /// Error reason.
+      string EOF = 3;                /// End of file; playback finished
+      Mode mode = 4;                 /// Active with mode.
     }
-  uint64 offsetTime = 5;            /// Current offset in micro seconds.
-  uint64 startTime = 6;             /// Start time in monotonic micro seconds.
-  uint64 endTime = 7;               /// End time in monotonic micro seconds.
-  int64 timeDeviation = 8;          /// Time deviation in micro seconds, measured by server.
+  uint64 offsetTime = 5;             /// Current offset in micro seconds.
+  uint64 startTime = 6;              /// Start time in monotonic micro seconds.
+  uint64 endTime = 7;                /// End time in monotonic micro seconds.
+  int64 timeDeviation = 8;           /// Time deviation in micro seconds, measured by server.
+  int64 offsetWallClockVsSample = 9; /// Signal and wall clock offset. Signals might have a seperate timestamp.
 }
 
 /// Information about all playbacks and recordings.
