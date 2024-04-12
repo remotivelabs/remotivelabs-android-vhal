@@ -35,6 +35,8 @@ message PlaybackMode {
   uint64 endTime = 7;                /// End time in monotonic micro seconds.
   int64 timeDeviation = 8;           /// Time deviation in micro seconds, measured by server.
   int64 offsetWallClockVsSample = 9; /// Signal and wall clock offset. Signals might have a seperate timestamp.
+  bool noPlaybackToApplication = 10; /// Allows disabling of data flow from recording to application layers. Default is set to false.
+  bool playbackToBus = 11;           /// Let data to be replayed to the bus specified in intefaces.json. Defalt set to false.
 }
 
 /// Information about all playbacks and recordings.
