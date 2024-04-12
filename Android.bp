@@ -8,16 +8,19 @@ cc_library_static {
     	"DefaultVehicleHalProtoStub_h",
     	"CommonProtoStub_h",
         "NetworkProtoStub_h",
+        "TrafficProtoStub_h",
     ],
     export_generated_headers: [
     	"DefaultVehicleHalProtoStub_h",
         "CommonProtoStub_h",
         "NetworkProtoStub_h",
+        "TrafficProtoStub_h",
     ],
     generated_sources: [
     	"DefaultVehicleHalProtoStub_cc",
         "CommonProtoStub_cc",
         "NetworkProtoStub_cc",
+        "TrafficProtoStub_cc"
     ],
     shared_libs: [
         "libgrpc++",
@@ -60,6 +63,22 @@ genrule {
 }
 
 genrule {
+    name: "TrafficProtoStub_h",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-cpp-plugin",
+    ],
+    cmd: "$(location aprotoc) -I$$(dirname $(in)) -Ihardware/interfaces/automotive/vehicle/proto -Iexternal/protobuf/src --plugin=protoc-gen-grpc=$(location protoc-gen-grpc-cpp-plugin) $(in) --grpc_out=$(genDir) --cpp_out=$(genDir)",
+    srcs: [
+        "proto_files/traffic_api.proto",
+    ],
+    out: [
+        "traffic_api.pb.h",
+        "traffic_api.grpc.pb.h",
+    ],
+}
+
+genrule {
     name: "CommonProtoStub_cc",
     tools: [
         "aprotoc",
@@ -92,7 +111,7 @@ genrule {
 }
 
 genrule {
-    name: "NetworkProtoStub_cc",
+    name: "TrafficProtoStub_cc",
     tools: [
         "aprotoc",
         "protoc-gen-grpc-cpp-plugin",
