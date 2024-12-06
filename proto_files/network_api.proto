@@ -29,6 +29,8 @@ message SubscriberConfig {
   SignalIds signals = 2;
   /// Only trigger callback when value changes when set to true.
   bool onChange = 3;
+  /// Will trigger an initial empty response once the subscription is ready
+  bool initialEmpty = 4;
 }
 
 message SubscriberWithScriptConfig {
