@@ -90,6 +90,10 @@ message Signal {
     double double = 3;      /// Floating point data type (double).
     bool arbitration = 4;   /// Exclusive for LIN bus, present as true when a header is presented on the bus.
     bool empty = 6;         /// No data supplied.
+    /// (Supports publishing signals with named values or raw signals.
+    /// - If the signal has named values, the provided value must exactly match a defined name (case-sensitive).
+    /// - For raw signals, the provided value can be any string.)
+    string str = 8;
   }
   bytes raw = 5;            /// Binary data of value, relevant for Frames.
   int64 timestamp = 7;      /// time stamp in micro seconds, set when first seen.
