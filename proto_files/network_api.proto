@@ -93,7 +93,7 @@ message Signal {
     /// (Supports publishing signals with named values or raw signals.
     /// - If the signal has named values, the provided value must exactly match a defined name (case-sensitive).
     /// - For raw signals, the provided value can be any string.)
-    string str = 8;
+    string str_value = 8;
   }
   bytes raw = 5;            /// Binary data of value, relevant for Frames.
   int64 timestamp = 7;      /// time stamp in micro seconds, set when first seen.
