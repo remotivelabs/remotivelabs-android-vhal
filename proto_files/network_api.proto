@@ -1,19 +1,40 @@
 syntax = "proto3";
 
 import "common.proto";
+import "google/api/annotations.proto";
 
 package base;
 
 /// Signal publish, subscribe and read.
 service NetworkService {
   /// Subscribe to signals.
-  rpc SubscribeToSignals (SubscriberConfig) returns (stream Signals) {}
+  rpc SubscribeToSignals (SubscriberConfig) returns (stream Signals) {
+    option (google.api.http) = {
+      post: "/v1/SubscribeToSignals/"
+      body: "*"
+    };
+  }
   /// Subscribe to signals with transform provided as a LUA script.
-  rpc SubscribeToSignalWithScript (SubscriberWithScriptConfig) returns (stream Signals) {}
+  rpc SubscribeToSignalWithScript (SubscriberWithScriptConfig) returns (stream Signals) {
+    option (google.api.http) = {
+      post: "/v1/SubscribeToSignalWithScript/"
+      body: "*"
+    };
+  }
   /// A stream which emits frames distributions of a provided namespace. Useful for diagnostic purposes. Counts are reset every 500 ms.
-  rpc SubscribeToFramesDistribution (FramesDistributionConfig) returns (stream FramesDistribution) {}
+  rpc SubscribeToFramesDistribution (FramesDistributionConfig) returns (stream FramesDistribution) {
+    option (google.api.http) = {
+      post: "/v1/SubscribeToFramesDistribution/"
+      body: "*"
+    };
+  }
   /// Publish signals with values.
-  rpc PublishSignals (PublisherConfig) returns (Empty) {}
+  rpc PublishSignals (PublisherConfig) returns (Empty) {
+    option (google.api.http) = {
+      post: "/v1/PublishSignals/"
+      body: "*"
+    };
+  }
   /// Read signals from cache.
   rpc ReadSignals (SignalIds) returns (Signals) {}
 }
@@ -72,10 +93,6 @@ message Signals {
 /// Parameters for publishing values.
 message PublisherConfig {
   Signals signals = 1;      /// Signals with values.
-  /**
-   * Identifier of publisher, typically your app identifier.
-   * Subscribers with same identifier will not trigger callback.
-   */
   ClientId clientId = 2;
   /// Specify frequency of publication. Specify 0 to only publish once.
   int32 frequency = 3;

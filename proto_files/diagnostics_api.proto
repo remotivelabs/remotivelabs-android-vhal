@@ -1,15 +1,26 @@
 syntax = "proto3";
 
 import "common.proto";
+import "google/api/annotations.proto";
 
 package diagnostics;
 
 
 service DiagnosticsService {
   /// CAN MF sending.
-  rpc PublishMultiFrame (PublisherConfig) returns (base.Empty) {}
+  rpc PublishMultiFrame (PublisherConfig) returns (base.Empty) {
+    option (google.api.http) = {
+      post: "/v1/PublishMultiFrame/"
+      body: "*"
+    };
+  }
   /// CAN MF Receiving.
-  rpc SubscribeMultiFrame (SubscriberConfig) returns (stream Payload) {}
+  rpc SubscribeMultiFrame (SubscriberConfig) returns (stream Payload) {
+    option (google.api.http) = {
+      post: "/v1/SubscribeMultiFrame/"
+      body: "*"
+    };
+  }
 }
 
 message LinkTimers {

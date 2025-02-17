@@ -1,49 +1,113 @@
 syntax = "proto3";
 
 import "common.proto";
+import "google/api/annotations.proto";
 
 package base;
 
 /// Handle configuration of the RemotiveBroker server.
 service SystemService {
     /// Get current configuration of server.
-    rpc GetConfiguration (Empty) returns (Configuration) {}
+    rpc GetConfiguration (Empty) returns (Configuration) {
+      option (google.api.http) = {
+        post: "/v1/GetConfiguration/"
+        body: "*"
+      };
+    }
     /// Get list of all available frames and signals on server.
-    rpc ListSignals (NameSpace) returns (Frames) {}
+    rpc ListSignals (NameSpace) returns (Frames) {
+      option (google.api.http) = {
+        post: "/v1/ListSignals/"
+        body: "*"
+      };
+    }
+
+    /// Check if broker is running and ready to serve
+    rpc HealthCheck (Empty) returns (Empty) {
+      option (google.api.http) = {
+        get: "/"
+        body: "*"
+      };
+    }
 
     /**
      * Upload file using chunks (without streams), specifically useful for
      * gRPC-web which does not support Client-side streaming.
      */
-    rpc UploadFileChunk (FileUploadChunkRequest) returns (FileUploadResponse) {}
+    rpc UploadFileChunk (FileUploadChunkRequest) returns (FileUploadResponse) {
+      option (google.api.http) = {
+        post: "/v1/UploadFileChunk/"
+        body: "*"
+      };
+    }
 
     /**
      * Upload file using streams, preferred option for client with Client-side
      * streaming.
      */
-    rpc UploadFile (stream FileUploadRequest) returns (FileUploadResponse) {}
+    rpc UploadFile (stream FileUploadRequest) returns (FileUploadResponse) {
+      option (google.api.http) = {
+        post: "/v1/UploadFile/"
+        body: "*"
+      };
+    }
 
     /// Delete a single or multiple files from server.
-    rpc BatchDeleteFiles (FileDescriptions) returns (Empty) {}
+    rpc BatchDeleteFiles (FileDescriptions) returns (Empty) {
+      option (google.api.http) = {
+        post: "/v1/BatchDeleteFiles/"
+        body: "*"
+      };
+    }
 
     /// Download a single or multiple files from server.
-    rpc BatchDownloadFiles (FileDescriptions) returns (stream FileDownloadResponse) {}
-    rpc BatchDownloadFileChunks (BatchDownloadFileChunksRequest) returns (BatchDownloadFileChunksResponse) {}
+    rpc BatchDownloadFiles (FileDescriptions) returns (stream FileDownloadResponse) {
+      option (google.api.http) = {
+        post: "/v1/BatchDownloadFiles/"
+        body: "*"
+      };
+    }
+    rpc BatchDownloadFileChunks (BatchDownloadFileChunksRequest) returns (BatchDownloadFileChunksResponse) {
+      option (google.api.http) = {
+        post: "/v1/BatchDownloadFileChunks/"
+        body: "*"
+      };
+    }
 
     /**
      * Will not return until new configuration is tested an active, make sure
      * to set timeout to a large value. (fibex on pi > 50s).
      */
-    rpc ReloadConfiguration (Empty) returns (ReloadMessage) {}
+    rpc ReloadConfiguration (Empty) returns (ReloadMessage) {
+      option (google.api.http) = {
+        post: "/v1/ReloadConfiguration/"
+        body: "*"
+      };
+    }
 
     /// Get information about server license.
-    rpc GetLicenseInfo (Empty) returns (LicenseInfo) {}
+    rpc GetLicenseInfo (Empty) returns (LicenseInfo) {
+      option (google.api.http) = {
+        post: "/v1/GetLicenseInfo/"
+        body: "*"
+      };
+    }
 
     /// Set server license.
-    rpc SetLicense (License) returns (LicenseInfo) {}
+    rpc SetLicense (License) returns (LicenseInfo) {
+      option (google.api.http) = {
+        post: "/v1/SetLicense/"
+        body: "*"
+      };
+    }
 
     /// Sets a custom property, such as SecOc parameters
-    rpc SetProperty (PropertyValue) returns (Empty) {}
+    rpc SetProperty (PropertyValue) returns (Empty) {
+      option (google.api.http) = {
+        post: "/v1/SetProperty/"
+        body: "*"
+      };
+    }
 }
 
 /// Configuration of server.

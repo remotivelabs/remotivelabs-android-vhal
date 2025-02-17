@@ -2,15 +2,26 @@ syntax = "proto3";
 
 import "common.proto";
 import "system_api.proto";
+import "google/api/annotations.proto";
 
 package base;
 
 /// Handle playback and recordings.
 service TrafficService {
   /// Play a playback or start recording.
-  rpc PlayTraffic (PlaybackInfos) returns (PlaybackInfos) {}
+  rpc PlayTraffic (PlaybackInfos) returns (PlaybackInfos) {
+    option (google.api.http) = {
+      post: "/v1/PlayTraffic/"
+      body: "*"
+    };
+  }
   /// Get continuous status of playback states.
-  rpc PlayTrafficStatus (Empty) returns (stream PlaybackInfos) {}
+  rpc PlayTrafficStatus (Empty) returns (stream PlaybackInfos) {
+    option (google.api.http) = {
+      post: "/v1/PlayTrafficStatus/"
+      body: "*"
+    };
+  }
 }
 
 /// Modes of playback and recording.
