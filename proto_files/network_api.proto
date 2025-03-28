@@ -115,3 +115,12 @@ message Signal {
   bytes raw = 5;            /// Binary data of value, relevant for Frames.
   int64 timestamp = 7;      /// time stamp in micro seconds, set when first seen.
 }
+
+message Value {
+  oneof value {
+    int64 integer = 2;
+    bytes raw = 3;
+    double double = 4;
+    string strValue = 5;
+  }
+}

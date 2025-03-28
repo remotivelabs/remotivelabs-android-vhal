@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+import "common.proto";
+import "network_api.proto";
+import "google/api/annotations.proto";
+
+package base;
+
+service RestbusService {
+  // Add starts the Restbus if the startOption is START_AFTER_INIT.
+  // Add removes any previous configuration before applying the new one.
+  rpc Add (AddRequest) returns (Empty) {
+    option (google.api.http) = {
+      post: "/v1/Add/"
+      body: "*"
+    };
+  }
+
+  // Remove
+  rpc Remove (RemoveRequest) returns (Empty) {
+    option (google.api.http) = {
+      patch: "/v1/Remove/"
+      body: "*"
+    };
+  }
+
+  // Update updates the values of signals configured in the Restbus.
+  // The values are updated and the Restbus will emit the new values at the next cycle after the update.
+  rpc Update (UpdateRequest) returns (Empty) {
+    option (google.api.http) = {
+      patch: "/v1/Update/"
+      body: "*"
+    };
+  }
+
+  // Start starts the Restbus
+  rpc Start (RestbusRequest) returns (Empty) {
+    option (google.api.http) = {
+      patch: "/v1/Start/"
+      body: "*"
+    };
+  }
+
+  // Stop stops the Restbus
+  rpc Stop (RestbusRequest) returns (Empty) {
+    option (google.api.http) = {
+      patch: "/v1/Stop/"
+      body: "*"
+    };
+  }
+
+  // Reset resets signals configured in the Restbus or the whole Restbus depending on the request.
+  // Signals are reset to their default values as configured by the Configure request.
+  rpc Reset (ResetRequest) returns (Empty) {
+    option (google.api.http) = {
+      put: "/v1/Reset/"
+      body: "*"
+    };
+  }
+}
+
+enum StartOption {
+  START_AFTER_INIT = 0;
+  STOPPED = 1;
+}
+
+message RestbusRequest {
+  Namespaces namespaces = 1;
+}
+
+message AddRequest {
+  // clientId will be used by the Restbus when as source of the outgoing signals
+  ClientId clientId = 1;
+  StartOption startOption = 2;
+  oneof config {
+    FrameConfigs frames = 3;
+  }
+  repeated SignalSequence defaultSignals = 4;
+}
+
+message RemoveRequest {
+  oneof config {
+    Namespaces namespaces = 1;
+    SignalIds frameIds = 2;
+  }
+}
+
+message ResetRequest {
+  oneof config {
+    Namespaces namespaces = 1;
+    SignalIds frameIds = 2;
+    SignalIds signalIds = 3;
+  }
+}
+
+message UpdateRequest {
+  repeated SignalSequence signals = 1;
+}
+
+message FrameConfigs {
+  repeated FrameConfig items = 1;
+}
+
+message FrameConfig {
+  SignalId frameId = 1;
+  // The cycle time of the frame in milliseconds.
+  float cycleTime = 2;
+}
+
+message SignalSequence {
+  SignalId id = 1;
+  // The loop to be emitted in the sequence.
+  repeated Value loop = 2;
+  // The initial values to be emitted before the loop is iterated.
+  repeated Value initial = 3;
+}

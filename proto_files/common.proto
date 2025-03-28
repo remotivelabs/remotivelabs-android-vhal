@@ -93,6 +93,10 @@ message NameSpace {
   string name = 1; /// Name of name space, which in turn is typically redirected in interfaces.json to an electrical interface.
 }
 
+message Namespaces {
+  repeated NameSpace items = 1;
+}
+
 /// Information about network
 message NetworkInfo {
   NameSpace namespace = 1;              /// Corresponding name space.
