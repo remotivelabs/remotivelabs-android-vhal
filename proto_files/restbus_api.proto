@@ -7,7 +7,7 @@ import "google/api/annotations.proto";
 package base;
 
 service RestbusService {
-  // Add starts the Restbus if the startOption is START_AFTER_INIT.
+  // Add starts the Restbus if the startOption is START_AFTER_ADD.
   // Add removes any previous configuration before applying the new one.
   rpc Add (AddRequest) returns (Empty) {
     option (google.api.http) = {
@@ -60,8 +60,10 @@ service RestbusService {
 }
 
 enum StartOption {
-  START_AFTER_INIT = 0;
-  STOPPED = 1;
+  // Will start the restbus if it is not already started
+  START_AFTER_ADD = 0;
+  // Will keep the current state of the restbus
+  NOP = 1;
 }
 
 message RestbusRequest {
@@ -71,6 +73,7 @@ message RestbusRequest {
 message AddRequest {
   // clientId will be used by the Restbus when as source of the outgoing signals
   ClientId clientId = 1;
+  // startOption affects all frames in the namespace
   StartOption startOption = 2;
   oneof config {
     FrameConfigs frames = 3;
@@ -104,6 +107,8 @@ message FrameConfigs {
 message FrameConfig {
   SignalId frameId = 1;
   // The cycle time of the frame in milliseconds.
+  // Setting cycle time 0 will make the broker use the default cycle time of the frame
+  // Cycle time must be greater than 0, otherwise the frame is ignored by the Restbus
   float cycleTime = 2;
 }
 
