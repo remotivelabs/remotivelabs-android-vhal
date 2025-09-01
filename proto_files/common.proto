@@ -44,7 +44,11 @@ message Multiplex {
 
 /// Supported E2E profiles.
 enum E2eProfile {
-    PROFILE_AR_01A = 0; /// Autosar 1A
+    PROFILE_AR_01A = 0;   /// Autosar 1A Both
+    PROFILE_AR_01B = 1;   /// Autosar 1B Alternating
+    PROFILE_AR_01C = 2;   /// Autosar 1 Nibble
+    PROFILE_AR_01Low = 3; /// Autosar 1 Low
+    PROFILE_AR_05 = 4;    /// Autosar 5
 }
 
 /// Information about E2E configuration.
