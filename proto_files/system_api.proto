@@ -93,6 +93,14 @@ service SystemService {
       };
     }
 
+    rpc GetFrontendSettings (FrontendSettingsRequest) returns (FrontendSettingsResponse) {
+      option (google.api.http) = {
+        post: "/v1/GetFrontendSettings/"
+        body: "*"
+      };
+    }
+
+
     /// Set server license.
     rpc SetLicense (License) returns (LicenseInfo) {
       option (google.api.http) = {
@@ -108,6 +116,26 @@ service SystemService {
         body: "*"
       };
     }
+}
+
+message FrontendSettingsRequest {
+  oneof request {
+    FrontendSettingsRequest0 _0 = 1;
+  }
+}
+
+message FrontendSettingsResponse {
+  oneof response {
+    FrontendSettingsResponse0 _0 = 1;
+  }
+}
+
+message FrontendSettingsRequest0 {
+  string data = 1;
+}
+
+message FrontendSettingsResponse0 {
+  string data = 1;
 }
 
 /// Configuration of server.
