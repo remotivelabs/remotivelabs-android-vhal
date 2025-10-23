@@ -120,21 +120,21 @@ service SystemService {
 
 message FrontendSettingsRequest {
   oneof request {
-    FrontendSettingsRequest0 _0 = 1;
+    FrontendSettingsRequestV1 v1 = 1;
   }
 }
 
 message FrontendSettingsResponse {
   oneof response {
-    FrontendSettingsResponse0 _0 = 1;
+    FrontendSettingsResponseV1 v1 = 1;
   }
 }
 
-message FrontendSettingsRequest0 {
+message FrontendSettingsRequestV1 {
   string data = 1;
 }
 
-message FrontendSettingsResponse0 {
+message FrontendSettingsResponseV1 {
   string data = 1;
 }
 
