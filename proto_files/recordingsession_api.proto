@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+import "common.proto";
+import "google/api/annotations.proto";
+
+package base;
+
+/// Handle playback and recordings.
+service RecordingSessionService {
+
+  // List files on server.
+  rpc ListRecordingFiles (FileListingRequest) returns (FileListingResponse) {
+    option (google.api.http) = {
+      post: "/v1/ListRecordingFiles/"
+      body: "*"
+    };
+  }
+
+  /// Get continuous status of all open recording sessions.
+  rpc PlaybackStatus (Empty) returns (stream RecordingSessionPlaybackStatuses) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackStatus"
+      body: "*"
+    };
+  }
+
+  /// Prepare playback of a recording session. Always close any opened session after use to avoid resource leaks.
+  rpc PlaybackOpen (RecordingSessionOpenCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackOpen"
+      body: "*"
+    };
+  }
+
+  /// Start playback of a recording session.
+  rpc PlaybackPlay (RecordingSessionPlayCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackPlay"
+      body: "*"
+    };
+  }
+
+  /// Pause playback of a recording session.
+  rpc PlaybackPause (RecordingSessionPauseCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackPause"
+      body: "*"
+    };
+  }
+
+  /// Seek to offset but keep current mode (playing/paused).
+  rpc PlaybackSeek (RecordingSessionSeekCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackSeek"
+      body: "*"
+    };
+  }
+
+  /// Close playback of a recording session.
+  rpc PlaybackClose (RecordingSessionCloseCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackClose"
+      body: "*"
+    };
+  }
+
+  /// Set or remove repeat information.
+  rpc PlaybackRepeat (RecordingSessionRepeatCommand) returns (RecordingSessionPlaybackStatus) {
+    option (google.api.http) = {
+      post: "/v1/RecordingSession/PlaybackRepeat"
+      body: "*"
+    };
+  }
+}
+
+// File listing request.
+message FileListingRequest {
+  string path = 1;                    /// Path to list files from, empty for root.
+  repeated FileType types = 2;        /// Type of file.
+}
+
+// File listing response.
+message FileListingResponse {
+  repeated File files = 1;            /// List of files.
+}
+
+// Information about a file.
+message File {
+  string path = 1;                   /// File information.
+  FileType type = 2;                 /// Type of file.
+  uint64 createdTime = 3;            /// Creation time in seconds since epoch.
+  uint64 modifiedTime = 4;           /// Modification time in seconds since epoch.
+  uint64 size = 5;                   /// Size of file in bytes.
+}
+
+// File types supported by RemotiveBroker.
+enum FileType {
+  FILE_TYPE_UNKNOWN = 0; /// Unknown file.
+  FILE_TYPE_FOLDER = 1; /// Folder.
+  FILE_TYPE_VIDEO = 2; /// Video file.
+  FILE_TYPE_AUDIO = 3; /// Audio file.
+  FILE_TYPE_IMAGE = 4; /// Image file.
+  FILE_TYPE_RECORDING = 5; /// Recording file (candump, blf, mdf, ...).
+  FILE_TYPE_RECORDING_SESSION = 6; /// Recording session file (.recording.yaml).
+  FILE_TYPE_RECORDING_MAPPING = 7; /// Recording mapping file (.mapping.yaml).
+  FILE_TYPE_PLATFORM = 8; /// Topology platform file (.platform.yaml).
+  FILE_TYPE_INSTANCE = 9; /// Topology instance file (.instance.yaml).
+  FILE_TYPE_SIGNAL_DATABASE = 10; /// Signal database file (dbc, ldf, ...).
+}
+
+message RecordingSessionPlaybackStatus {
+  string path = 1;                   /// File information.
+  RecordingSessionPlaybackMode mode = 3;             /// Current playback mode.
+  uint64 offset = 4;                 /// Current offset in micro seconds.
+  PlaybackRepeat repeat = 5;         /// Current repeat information (optional).
+}
+
+message RecordingSessionPlaybackStatuses {
+  repeated RecordingSessionPlaybackStatus items = 1;
+}
+
+message RecordingSessionOpenCommand {
+  string path = 1;                      /// File information.
+  repeated ChannelToNamespace mappings = 2; /// Optional channel to namespace mappings to override default behavior.
+  bool force = 3;                     /// Will close any opened session for the same path and open a new one.
+}
+
+message ChannelToNamespace {
+  string channel = 1;                   /// Channel name.
+  string namespace = 2;                 /// The namespace to use for channel.
+}
+
+message RecordingSessionPlayCommand {
+  string path = 1;                      /// File information.
+  optional uint64 offset = 2;           /// Optional offset in micro seconds.
+}
+
+message RecordingSessionPauseCommand {
+  string path = 1;                      /// File information.
+  optional uint64 offset = 2;           /// Optional offset in micro seconds.
+}
+
+message RecordingSessionSeekCommand {
+  string path = 1;                      /// File information.
+  uint64 offset = 2;                    /// Offset in micro seconds.
+}
+
+message RecordingSessionCloseCommand {
+  string path = 1;                      /// File information.
+}
+
+message RecordingSessionRepeatCommand {
+  string path = 1;                      /// File information.
+  optional uint64 startOffset = 2;      /// At which offset (in micro seconds) repeat should start. Omit to start at the beginning of the file.
+  optional uint64 endOffset = 3;        /// At which offset (in micro seconds) repeat should go back to starting offset. Omit to repeat until the end of the file.
+  // Note:
+  //  Setting both `startOffset` and `endOffset` to null disables repeat playback.
+}
+
+
+enum PlaybackCommand {
+  PLAYBACK_PLAY = 0;         /// Play a file.
+  PLAYBACK_PAUSE = 1;        /// Pause playback.
+  PLAYBACK_SEEK = 2;         /// Seek to offset but keep current state.
+  PLAYBACK_CLOSE = 3;        /// Stop and close playback.
+}
+
+enum RecordingSessionPlaybackMode {
+  PLAYBACK_PLAYING = 0;       /// Playing a file.
+  PLAYBACK_PAUSED = 1;        /// Playback is paused.
+  PLAYBACK_CLOSED = 2;        /// Playback in closed.
+}
+
+message PlaybackRepeat {
+  uint64 startOffset = 1;                /// At which offset (in micro seconds) repeat should start.
+  uint64 endOffset = 2;                  /// At which offset (in micro seconds) repeat should go back to starting offset.
+}

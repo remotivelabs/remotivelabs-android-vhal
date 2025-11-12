@@ -11,7 +11,7 @@ service RestbusService {
   // Add removes any previous configuration before applying the new one.
   rpc Add (AddRequest) returns (Empty) {
     option (google.api.http) = {
-      post: "/v1/Add/"
+      post: "/v1/Restbus/Add/"
       body: "*"
     };
   }
@@ -19,7 +19,7 @@ service RestbusService {
   // Remove
   rpc Remove (RemoveRequest) returns (Empty) {
     option (google.api.http) = {
-      patch: "/v1/Remove/"
+      post: "/v1/Restbus/Remove/"
       body: "*"
     };
   }
@@ -28,7 +28,7 @@ service RestbusService {
   // The values are updated and the Restbus will emit the new values at the next cycle after the update.
   rpc Update (UpdateRequest) returns (Empty) {
     option (google.api.http) = {
-      patch: "/v1/Update/"
+      post: "/v1/Restbus/Update/"
       body: "*"
     };
   }
@@ -36,7 +36,7 @@ service RestbusService {
   // Start starts the Restbus
   rpc Start (RestbusRequest) returns (Empty) {
     option (google.api.http) = {
-      patch: "/v1/Start/"
+      post: "/v1/Restbus/Start/"
       body: "*"
     };
   }
@@ -44,7 +44,7 @@ service RestbusService {
   // Stop stops the Restbus
   rpc Stop (RestbusRequest) returns (Empty) {
     option (google.api.http) = {
-      patch: "/v1/Stop/"
+      post: "/v1/Restbus/Stop/"
       body: "*"
     };
   }
@@ -53,7 +53,7 @@ service RestbusService {
   // Signals are reset to their default values as configured by the Configure request.
   rpc Reset (ResetRequest) returns (Empty) {
     option (google.api.http) = {
-      put: "/v1/Reset/"
+      post: "/v1/Restbus/Reset/"
       body: "*"
     };
   }
