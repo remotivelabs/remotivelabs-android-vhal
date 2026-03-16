@@ -49,6 +49,7 @@ enum E2eProfile {
     PROFILE_AR_01C = 2;   /// Autosar 1 Nibble
     PROFILE_AR_01Low = 3; /// Autosar 1 Low
     PROFILE_AR_05 = 4;    /// Autosar 5
+    PROFILE_AR_02 = 5;    /// Autosar 2
 }
 
 /// Information about E2E configuration.
