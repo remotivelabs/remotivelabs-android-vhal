@@ -150,6 +150,14 @@ message Configuration {
     string serverVersion = 5;
     /// Contains configuration file deprecation warnings, validation errors and similar
     string interfacesInfo = 6;
+    /// Directory for shared RemotiveLabs configuration including authentication
+    string remotiveConfigDir = 7;
+    /// Identifier for configuration file `interfaces.json`
+    string brokerConfigId = 8;
+    /// Identifier for topology instance that was used to generate the configuration for this RemotiveBroker
+    string topologyInstanceId = 9;
+    /// Identifier for when the topology instance was generated
+    string topologyGenerateId = 10;
 }
 
 /// Response from reload request.

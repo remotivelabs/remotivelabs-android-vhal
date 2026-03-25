@@ -8,6 +8,11 @@ package base;
 message Empty {
 }
 
+/// Response message for bidirectional streaming RPCs. Error is set when a request fails.
+message StreamError {
+  string error = 1;
+}
+
 /**
  * Identifier for client. Used in subscribe and publish. Subscriptions will not
  * receive updates from publish calls with the same ClientId.
@@ -91,6 +96,7 @@ message MetaData {
     repeated Group groups = 20;         /// Groups inside frame.
     uint32 frameId = 21;                /// Associated identification number for frame.
     map<int64, string> namedValues = 22; /// Key-value dictionary of named values.
+    int32 startBit = 23;                 /// Signal start bit in frame
 }
 
 /// Identifier for a name space.

@@ -33,6 +33,14 @@ service RestbusService {
     };
   }
 
+  // UpdateStream is a bidirectional streaming version of Update.
+  rpc UpdateStream (stream UpdateRequest) returns (stream StreamError) {
+    option (google.api.http) = {
+      post: "/v1/Restbus/UpdateStream/"
+      body: "*"
+    };
+  }
+
   // Start starts the Restbus
   rpc Start (RestbusRequest) returns (Empty) {
     option (google.api.http) = {

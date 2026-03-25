@@ -35,6 +35,15 @@ service NetworkService {
       body: "*"
     };
   }
+
+  /// Bidirectional streaming publish.
+  rpc PublishSignalsStream(stream PublisherConfig) returns (stream StreamError) {
+    option (google.api.http) = {
+      post: "/v1/PublishSignalsStream/"
+      body: "*"
+    };
+  }
+
   /// Read signals from cache.
   rpc ReadSignals (SignalIds) returns (Signals) {}
 }
@@ -111,6 +120,7 @@ message Signal {
     /// - If the signal has named values, the provided value must exactly match a defined name (case-sensitive).
     /// - For raw signals, the provided value can be any string.)
     string strValue = 8;
+    uint64 uinteger64 = 9;  /// Unsigned 64-bit integer value.
   }
   bytes raw = 5;            /// Binary data of value, relevant for Frames.
   int64 timestamp = 7;      /// time stamp in micro seconds, set when first seen.
@@ -122,5 +132,6 @@ message Value {
     bytes raw = 3;
     double double = 4;
     string strValue = 5;
+    uint64 uinteger64 = 6;
   }
 }
