@@ -116,6 +116,14 @@ service SystemService {
         body: "*"
       };
     }
+
+    /// Switch the active schedule for a LIN master namespace
+    rpc SwitchLinSchedule (LinScheduleSwitch) returns (Empty) {
+      option (google.api.http) = {
+        post: "/v1/SwitchLinSchedule/"
+        body: "*"
+      };
+    }
 }
 
 message FrontendSettingsRequest {
@@ -278,4 +286,10 @@ message PropertyValue {
      int64 integer = 4;
      double double = 5;
  }
+}
+
+/// Request to switch the active schedule for a LIN master namespace
+message LinScheduleSwitch {
+  NameSpace namespace = 1;          /// LIN namespace to switch schedule for
+  string schedule_table_name = 2;  /// Name of the schedule table to activate
 }
