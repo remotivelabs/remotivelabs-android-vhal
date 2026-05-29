@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package remotive.v2.model;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+import "remotive/v2/can.proto";
+import "remotive/v2/lin.proto";
+import "remotive/v2/ethernet.proto";
+import "remotive/v2/flexray.proto";
+
+/// A model represents an ECU or parts of an ECU that can be controlled by the user. A model is used to send messages on one or more namespaces.
+/// The model can be started and stopped, and what messages that should be sent when the model is running can be updated. 
+/// When the model is reset, the messages will be set to the initial messages defined by the user.
+service ModelService {
+  /// Stop the model. This will stop all messages from being sent.
+  /// This can be used to emulate shutting down an ECU.
+  rpc ModelStop (ModelStopRequest) returns (ModelStopResponse) {
+    option (google.api.http) = {
+      post: "/v2/Model/Stop/"
+      body: "*"
+    };
+  }
+  /// Reset the model to only send the initial messages.
+  /// This can be used to emulate a power cycle of an ECU.
+  rpc ModelReset (ModelResetRequest) returns (ModelResetResponse) {
+    option (google.api.http) = {
+      post: "/v2/Model/Reset/"
+      body: "*"
+    };
+  }
+  /// Start the model and sets the initial messages which will be used when the model is reset.
+  rpc SetInitialMessages (ModelSetMessages) returns (ModelSetMessagesResponse) {
+    option (google.api.http) = {
+      post: "/v2/Model/SetInitialMessages/"
+      body: "*"
+    };
+  }
+  /// Update the messages in the model. This can be used to add new messages, update existing messages and remove messages that should no longer be sent.
+  /// This should only be used by web clients which does not support bidirectional streaming.
+  rpc SetMessages (ModelSetMessages) returns (ModelSetMessagesResponse) {
+    option (google.api.http) = {
+      post: "/v2/Model/SetMessages/"
+      body: "*"
+    };
+  }
+  /// Bidirectional stream for updating the messages in the model. This can be used to add new messages, update existing messages and remove messages that should no longer be sent.
+  rpc SetMessagesStream (stream ModelSetMessages) returns (stream AsyncModelSetMessagesResponse) {
+    option (google.api.http) = {
+      post: "/v2/Model/SetMessagesStream/"
+      body: "*"
+    };
+  }
+}
+
+message ModelStopRequest {
+  string name = 1;
+}
+
+message ModelStopResponse {
+  oneof response {
+    google.protobuf.Empty nothing = 1;
+    common.Error error = 2;
+  }
+}
+
+message ModelResetRequest {
+  string name = 1;
+}
+
+message ModelResetResponse {
+  oneof response {
+    google.protobuf.Empty nothing = 1;
+    common.Error error = 2;
+  }
+}
+
+message ModelSetMessages {
+  string name = 1;
+  repeated ModelMessage messages = 2;
+}
+
+message ModelSetMessagesResponse {
+  oneof response {
+    google.protobuf.Empty nothing = 1;
+    common.Error error = 2;
+  }
+}
+
+/// Response when updating model messages asynchronously via bidirectional SetMessagesStream. 
+/// Currently this only contains errors as there are no correlation ids or similar to match responses to requests, but in the future it could be extended with more information if needed.
+message AsyncModelSetMessagesResponse {
+  oneof response {
+    common.Error error = 1;
+  }
+}
+
+enum ModelMessageChange {
+  /// Update message with new signal values, but keep existing signal values if not included in the message.
+  UPDATE = 0;
+  /// Set message with new signal values, and set any signal values not included in the message to default values.
+  SET = 1;
+  /// Remove the message from the model, i.e. it will no longer be sent. 
+  REMOVE = 2;
+}
+
+message ModelMessage {
+  /// List of signals with values.
+  repeated MessageSignalSequence signals = 1;
+
+  /// Change type, e.g. update, set or remove.
+  ModelMessageChange change = 2;
+
+  oneof type {
+    can.CanFrameAddress can = 3;
+    lin.LinFrameAddress lin = 4;
+    ethernet.EthernetPduAddress ethernet = 5;
+    ethernet.SomeIPEventAddress someipEvent = 6;
+    flexray.FlexRayPDUAddress flexray = 7;
+  }
+}
+
+message MessageSignalSequence {
+  int32 signalId = 1;
+  repeated common.Value initial = 2;
+  repeated common.Value loop = 3;
+}

@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package remotive.v2.event;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+import "remotive/v2/can.proto";
+import "remotive/v2/lin.proto";
+import "remotive/v2/ethernet.proto";
+import "remotive/v2/scripted.proto";
+import "remotive/v2/virtual.proto";
+
+service EventService {
+  /// Open an event channel for a web client. Use UpdateEventsChannel to subscribe/unsubscribe to events on this channel. Only web clients should use this function since they do not support bidirectional streaming.
+  rpc OpenEventsChannel(OpenEventsChannelRequest) returns (stream Event) {
+    option (google.api.http) = {
+      post: "/v2/Event/OpenChannel/"
+      body: "*"
+    };
+  }
+  /// Update an existing event channel with new subscribe/unsubscribe commands. This should be used by web clients, which do not support bidirectional streaming. 
+  rpc UpdateEventsChannel(SubscribeCommands) returns (UpdateEventsChannelResponse) {
+    option (google.api.http) = {
+      post: "/v2/Event/UpdateChannel/"
+      body: "*"
+    };
+  }
+  /// Bidirectional stream for subscribing to events. Clients can send subscribe/unsubscribe commands and receive events in the same stream.
+  /// This should be used by all clients except web clients, which do not support bidirectional streaming.
+  rpc SubscribeStream(stream SubscribeCommand) returns (stream Event) {
+    option (google.api.http) = {
+      post: "/v2/Event/SubscribeStream/"
+      body: "*"
+    };
+  }
+}
+
+message UpdateEventsChannelResponse {
+  oneof response {
+    google.protobuf.Empty nothing = 1;
+    common.Error error = 2;
+  }
+}
+
+message OpenEventsChannelRequest {
+  /// Unique identifier for the channel. Clients should generate a random channelId when opening a new channel and use the same channelId for subsequent updates to this channel.
+  /// If a channel with the same channelId already exists this request with be rejected with an error.
+  uint32 channelId = 1;
+  repeated SubscribeCommand commands = 2;
+}
+
+message Event {
+  oneof event {
+    ReceivedMessage message = 1;
+    common.Error error = 2;
+  }
+}
+
+enum SubscribeCommandType {
+  /// Update message subscription with new signals, but keep any existing signal subscriptions.
+  UPDATE = 0;
+  /// Subscribe only to these signals.
+  SET = 1;
+  /// Remove subscription from this message. Any signals included in the command will be ignored. 
+  REMOVE = 2;
+}
+
+message SubscribeCommands {
+  /// Unique identifier for the channel. This should match the channelId used when opening the channel.
+  uint32 channelId = 1;
+  repeated SubscribeCommand commands = 2;
+}
+
+message SubscribeCommand {
+  oneof command {
+    SubscribeMessageCommand subscribeMessageCommand = 1;
+  }
+}
+
+message SubscribeMessageCommand {
+  SubscribeCommandType type = 1;
+  repeated uint32 signalIds = 2;
+  /// Address of the message to subscribe to.
+  oneof address {
+    can.CanFrameAddress can = 3;
+    lin.LinFrameAddress lin = 4;
+    ethernet.EthernetPduAddress ethernet = 5;
+    ethernet.SomeIPRequestAddress someipRequest = 6;
+    ethernet.SomeIPResponseAddress someipResponse = 7;
+    ethernet.SomeIPEventAddress someipEvent = 8;
+    scripted.ScriptedSignalAddress scriptedSignal = 9;
+    virtual.VirtualSignalAddress virtualSignal = 10;
+  }
+}
+
+message ReceivedMessage {
+  /// Timestamp in micro seconds, set when first seen.
+  int64 timestamp = 1;
+  /// List of signals with values.
+  repeated common.MessageSignalValue signals = 2;
+  /// Header of the received message. Contains the address and other relevant information depending on the message type.
+  oneof header {
+    can.CanFrameHeader can = 3;
+    lin.LinFrameHeader lin = 4;
+    ethernet.EthernetPduHeader ethernet = 5;
+    ethernet.SomeIPRequestHeader someipRequest = 6;
+    ethernet.SomeIPResponseHeader someipResponse = 7;
+    ethernet.SomeIPEventHeader someipEvent = 8;
+    scripted.ScriptedSignalHeader scriptedSignal = 9;
+    virtual.VirtualSignalHeader virtualSignal = 10;
+  }
+}

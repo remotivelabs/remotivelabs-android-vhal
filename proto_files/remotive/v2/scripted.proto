@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package remotive.v2.scripted;
+
+message ScriptedSignalAddress {
+  uint32 namespaceId = 1;
+  uint32 signalId = 2;
+}
+
+message ScriptedSignalHeader {
+  ScriptedSignalAddress address = 1;
+}

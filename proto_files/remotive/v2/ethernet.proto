@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package remotive.v2.ethernet;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+
+service EthernetService {
+  /// Send an Ethernet PDU with the specified signals. The message will be sent immediately and will not be repeated.
+  /// Use ModelService to define messages that should be sent repeatedly.
+  rpc SendEthernetPDU (SendEthernetPDURequest) returns (SendEthernetPDUResponse) {
+    option (google.api.http) = {
+      post: "/v2/Ethernet/SendEthernetPDU/"
+      body: "*"
+    };
+  }
+  /// Send a SOME/IP event with the specified signals. The event will be sent immediately and will not be repeated.
+  /// Use ModelService to define messages that should be sent repeatedly.
+  rpc SendSomeIPSendEvent (SendSomeIPEventRequest) returns (SendSomeIPEventResponse) {
+    option (google.api.http) = {
+      post: "/v2/Ethernet/SendSomeIPSendEvent/"
+      body: "*"
+    };
+  }
+  /// Perform a SOME/IP request with the specified signals and optionally wait for the SOME/IP response.
+  rpc PerformSomeIPRequest(SomeIPRequest) returns (PerformSomeIPRequestResponse) {
+    option (google.api.http) = {
+      post: "/v2/Ethernet/PerformSomeIPRequest/"
+      body: "*"
+    };
+  }
+  /// Send a SOME/IP response with the specified signals after receiving a SOME/IP request. The client must correlate clientId and sessionId with the received SOME/IP request.
+  rpc SendSomeIPResponse(SendSomeIPResponseRequest) returns (SendSomeIPResponseResponse) {
+    option (google.api.http) = {
+      post: "/v2/Ethernet/SendSomeIPResponse/"
+      body: "*"
+    };
+  }
+  // TODO: Add functions for service discovery and similar
+}
+
+message EthernetPduAddress {
+  uint32 namespaceId = 1;
+  uint32 sourceSocketId = 2;
+  uint32 targetSocketId = 3;
+  uint32 pduId = 4;
+}
+
+message EthernetPduHeader {
+  EthernetPduAddress address = 1;
+}
+
+message SendEthernetPDURequest {
+  EthernetPduHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message SendEthernetPDUResponse {
+  common.Result result = 1;
+}
+message SomeIPEventAddress {
+  uint32 namespaceId = 1;
+  uint32 serviceInstanceId = 2;
+  uint32 eventId = 3;
+}
+
+message SomeIPEventHeader {
+  SomeIPEventAddress address = 1;
+}
+
+message SendSomeIPEventRequest {
+  SomeIPEventHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message SendSomeIPEventResponse {
+  common.Result result = 1;
+}
+
+message SomeIPRequest {
+  SomeIPRequestHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message PerformSomeIPRequestResponse {
+  oneof response {
+    SomeIPResponse someipResponse = 1;
+    common.Error error = 2;
+    google.protobuf.Empty nothing = 3;
+  }
+}
+
+message SomeIPResponse {
+  SomeIPResponseHeader header = 1;
+  /// List of signals with values.
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message SomeIPRequestAddress {
+  uint32 namespaceId = 1;
+  uint32 serviceInstanceId = 2;
+  uint32 methodId = 3;
+}
+
+message SomeIPRequestHeader {
+  SomeIPRequestAddress address = 1;
+  SomeIPRequestType requestType = 2;
+  uint32 clientId = 3;
+  uint32 sessionId = 4;
+}
+
+message SomeIPResponseAddress {
+  uint32 namespaceId = 1;
+  uint32 serviceInstanceId = 2;
+  uint32 methodId = 3;
+}
+
+message SomeIPResponseHeader {
+  SomeIPResponseAddress address = 1;
+  SomeIPResponseType responseType = 2;
+  uint32 clientId = 3;
+  uint32 sessionId = 4;
+}
+
+message SendSomeIPResponseRequest {
+  SomeIPResponseHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message SendSomeIPResponseResponse {
+  common.Result result = 1;
+}
+
+enum SomeIPRequestType {
+  SOMEIP_REQUEST = 0;
+  SOMEIP_REQUEST_NO_RETURN = 1;
+}
+
+enum SomeIPResponseType {
+  SOMEIP_E_OK = 0;
+  SOMEIP_E_NOT_OK = 1;
+  SOMEIP_E_UNKNOWN_SERVICE = 2;
+  SOMEIP_E_UNKNOWN_METHOD = 3;
+  SOMEIP_E_NOT_READY = 4;
+  SOMEIP_E_NOT_REACHABLE = 5;
+  SOMEIP_E_TIMEOUT = 6;
+  SOMEIP_E_WRONG_PROTOCOL_VERSION = 7;
+  SOMEIP_E_WRONG_INTERFACE_VERSION = 8;
+  SOMEIP_E_MALFORMED_MESSAGE = 9;
+  SOMEIP_E_WRONG_MESSAGE_TYPE = 10;
+}
+

@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package remotive.v2.signaldb;
+
+import "google/api/annotations.proto";
+
+service SignalDatabaseService {
+  rpc ListNamespaces (ListNamespacesRequest) returns (Namespaces) {
+    option (google.api.http) = {
+      post: "/v2/SignalDb/ListNamespaces/"
+      body: "*"
+    };
+  }
+  rpc GetSignalDatabase (NamespaceId) returns (SignalDatabase) {
+    option (google.api.http) = {
+      post: "/v2/SignalDb/GetSignalDatabase/"
+      body: "*"
+    };
+  }
+  /// Return the name <-> id mapping for a namespace. Ids are scoped to the
+  /// namespace: each distinct name has exactly one id, so entities sharing a
+  /// name (e.g. a frame and a signal both called "Foo") share the id. The
+  /// empty-string entry "" is the raw frame payload.
+  ///
+  /// Every id referenced inside a namespace address resolves through this
+  /// mapping — frameId, pduId, eventId, methodId, signalId, sourceSocketId,
+  /// targetSocketId, serviceInstanceId, clientId, sessionId. The only
+  /// exceptions are namespaceId (discovered via ListNamespaces) and
+  /// channelId (client-chosen).
+  rpc GetNameMapping (NamespaceId) returns (NameMapping) {
+    option (google.api.http) = {
+      post: "/v2/SignalDb/GetNameMapping/"
+      body: "*"
+    };
+  }
+}
+
+message ListNamespacesRequest {
+  // This message is intentionally left empty. It is only used to trigger the ListNamespaces RPC.
+}
+
+message Namespaces {
+  repeated Namespace namespaces = 1;
+}
+
+message NamespaceId {
+  uint32 id = 1;
+}
+
+message Namespace {
+  uint32 id = 1;
+  oneof kind {
+    EcuNamespace ecu = 2;
+    TapNamespace tap = 3;
+    TopologyNamespace topology = 4;
+    VirtualNamespace virtual = 5;
+    ScriptedNamespace scripted = 6;
+  }
+}
+
+enum ChannelType {
+  CAN = 0;
+  LIN = 1;
+  ETHERNET = 2;
+  FLEXRAY = 3;
+}
+
+message EcuNamespace {
+  string channel = 1;
+  ChannelType channelType = 2;
+  string ecu = 3;
+}
+
+message TapNamespace {
+  string channel = 1;
+  ChannelType channelType = 2;
+}
+
+message TopologyNamespace {
+  string channel = 1;
+  ChannelType channelType = 2;
+}
+
+message VirtualNamespace {
+  string name = 1;
+}
+
+message ScriptedNamespace {
+  string name = 1;
+}
+
+message SignalDatabase {
+  string yaml = 1;
+}
+
+message MappingEntry {
+  uint32 id = 1;
+  string name = 2;
+}
+
+// Number-to-name mapping for a namespace. Names are unique within a namespace —
+// a frame and a signal (or any two entities) that share a name share the same id.
+message NameMapping {
+  repeated MappingEntry entries = 1;
+}

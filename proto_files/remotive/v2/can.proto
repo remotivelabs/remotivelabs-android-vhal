@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package remotive.v2.can;
+
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+
+service CanService {
+  /// Send a CAN frame with the specified signals. The frame will be sent immediately and will not be repeated.
+  /// Use ModelService to define messages that should be sent repeatedly.
+  rpc SendFrame (SendFrameRequest) returns (SendMessageResponse) {
+    option (google.api.http) = {
+      post: "/v2/Can/SendFrame/"
+      body: "*"
+    };
+  }
+}
+
+message CanFrameAddress {
+  uint32 namespaceId = 1;
+  uint32 frameId = 2;
+}
+
+message CanFrameHeader {
+  CanFrameAddress address = 1;
+}
+
+message SendFrameRequest {
+  CanFrameHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message SendMessageResponse {
+  common.Result result = 1;
+}
+

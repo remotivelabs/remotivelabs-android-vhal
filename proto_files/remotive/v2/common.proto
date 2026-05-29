@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package remotive.v2.common;
+
+import "google/protobuf/empty.proto";
+
+message Result {
+  oneof response {
+    google.protobuf.Empty nothing = 1;
+    Error error = 2;
+  }
+}
+
+message MessageSignalValue {
+  uint32 signalId = 1;
+  Value value = 2;
+}
+
+message Error {
+  string message = 1;
+}
+
+message Value {
+  oneof value {
+    int64 integer = 2;
+    bytes raw = 3;
+    double double = 4;
+    string strValue = 5;
+    uint64 uinteger64 = 6;
+  }
+}

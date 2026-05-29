@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package remotive.v2.flexray;
+
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+
+service FlexRayService {
+  /// Update the cache for the FlexRay PDU with the specified signals. The PDU will be sent according to the schedule of the FlexRay cluster.
+  /// Prefer using ModelService to define messages that should be sent repeatedly.
+  rpc SetPDU (FlexRaySetPDURequest) returns (FlexRaySetPDUResponse) {
+    option (google.api.http) = {
+      post: "/v2/FlexRay/SetPDU/"
+      body: "*"
+    };
+  }
+  // TODO: Add functions for schema control
+}
+
+message FlexRayPDUAddress {
+  uint32 namespaceId = 1;
+  uint32 pduId = 2;
+}
+
+message FlexRayPDUHeader {
+  FlexRayPDUAddress address = 1;
+}
+
+message FlexRaySetPDURequest {
+  FlexRayPDUHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message FlexRaySetPDUResponse {
+  common.Result result = 1;
+}

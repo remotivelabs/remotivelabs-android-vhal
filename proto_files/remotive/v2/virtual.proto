@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package remotive.v2.virtual;
+
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+
+service VirtualService {
+  rpc SendMessage (VirtualSendMessageRequest) returns (VirtualSendMessageResponse) {
+    option (google.api.http) = {
+      post: "/v2/Virtual/SendMessage/"
+      body: "*"
+    };
+  }
+}
+
+message VirtualSignalAddress {
+  uint32 namespaceId = 1;
+  string name = 2;
+}
+
+message VirtualSignalHeader {
+  VirtualSignalAddress address = 1;
+}
+
+message VirtualSendMessageRequest {
+  VirtualSignalHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message VirtualSendMessageResponse {
+  common.Result result = 1;
+}

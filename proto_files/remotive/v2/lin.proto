@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package remotive.v2.lin;
+
+import "google/api/annotations.proto";
+import "remotive/v2/common.proto";
+
+service LinService {
+  /// Prepare a LIN frame with the specified signals. The frame will be sent according to the schedule of the LIN master.
+  /// Prefer using ModelService to define messages that should be sent repeatedly.
+  rpc SetFrame (LinSetFrameRequest) returns (LinSetFrameResponse) {
+    option (google.api.http) = {
+      post: "/v2/Lin/SetFrame/"
+      body: "*"
+    };
+  }
+  // TODO: Add functions for schema control
+}
+
+message LinFrameAddress {
+  uint32 namespaceId = 1;
+  uint32 frameId = 2;
+}
+
+message LinFrameHeader {
+  LinFrameAddress address = 1;
+  /// If true, this message represents the master requesting the frame to be sent. If false, this message represents a slave response to a master request.
+  bool arbitration = 2;
+}
+
+message LinSetFrameRequest {
+  LinFrameHeader header = 1;
+  repeated common.MessageSignalValue signals = 2;
+}
+
+message LinSetFrameResponse {
+  common.Result result = 1;
+}
