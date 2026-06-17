@@ -19,7 +19,7 @@ service EventService {
       body: "*"
     };
   }
-  /// Update an existing event channel with new subscribe/unsubscribe commands. This should be used by web clients, which do not support bidirectional streaming. 
+  /// Update an existing event channel with new subscribe/unsubscribe commands. This should be used by web clients, which do not support bidirectional streaming.
   rpc UpdateEventsChannel(SubscribeCommands) returns (UpdateEventsChannelResponse) {
     option (google.api.http) = {
       post: "/v2/Event/UpdateChannel/"
