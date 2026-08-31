@@ -101,7 +101,7 @@ enum FileType {
   FILE_TYPE_AUDIO = 3; /// Audio file.
   FILE_TYPE_IMAGE = 4; /// Image file.
   FILE_TYPE_RECORDING = 5; /// Recording file (candump, blf, mdf, ...).
-  FILE_TYPE_RECORDING_SESSION = 6; /// Recording session file (.recording.yaml).
+  FILE_TYPE_RECORDING_SESSION = 6; /// Recording session file (.recordingsession.yaml).
   FILE_TYPE_RECORDING_MAPPING = 7; /// Recording mapping file (.mapping.yaml).
   FILE_TYPE_PLATFORM = 8; /// Topology platform file (.platform.yaml).
   FILE_TYPE_INSTANCE = 9; /// Topology instance file (.instance.yaml).

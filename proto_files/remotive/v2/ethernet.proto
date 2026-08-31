@@ -8,7 +8,6 @@ import "remotive/v2/common.proto";
 
 service EthernetService {
   /// Send an Ethernet PDU with the specified signals. The message will be sent immediately and will not be repeated.
-  /// Use ModelService to define messages that should be sent repeatedly.
   rpc SendEthernetPDU (SendEthernetPDURequest) returns (SendEthernetPDUResponse) {
     option (google.api.http) = {
       post: "/v2/Ethernet/SendEthernetPDU/"
@@ -16,7 +15,6 @@ service EthernetService {
     };
   }
   /// Send a SOME/IP event with the specified signals. The event will be sent immediately and will not be repeated.
-  /// Use ModelService to define messages that should be sent repeatedly.
   rpc SendSomeIPSendEvent (SendSomeIPEventRequest) returns (SendSomeIPEventResponse) {
     option (google.api.http) = {
       post: "/v2/Ethernet/SendSomeIPSendEvent/"

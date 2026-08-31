@@ -29,3 +29,24 @@ message Value {
     uint64 uinteger64 = 6;
   }
 }
+
+/// A signal held for writing by the broker. The broker keeps the value for a signal and writes it to the bus
+/// when the message it belongs to is written. Every write emits one value: the `once` values first, one per
+/// write, then the `loop` values, one per write, restarting from the beginning of the loop. A single static
+/// value is expressed as one loop value.
+///
+/// Leaving the loop empty does not mean "no loop": it defaults to the signal's signal-database start value,
+/// so a signal with only `once` values plays them and then sits at its start value. A signal therefore never
+/// runs out of values.
+///
+/// A signal not included in a request keeps its current value and its position in the sequence; a signal
+/// that is included restarts from its first value. A signal included with both lists empty is simply the
+/// start value, which is how you stop driving one signal.
+message SenderSignal {
+  uint32 signalId = 1;
+  /// Values emitted one per write, before the loop starts.
+  repeated Value once = 2;
+  /// Values emitted one per write, looping back to the start. Defaults to the signal's signal-database
+  /// start value, so omitting it plays the `once` values and then holds the default.
+  repeated Value loop = 3;
+}

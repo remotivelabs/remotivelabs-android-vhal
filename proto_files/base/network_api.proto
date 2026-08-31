@@ -21,7 +21,7 @@ service NetworkService {
       body: "*"
     };
   }
-  /// A stream which emits frames distributions of a provided namespace. Useful for diagnostic purposes. Counts are reset every 500 ms.
+  /// A stream which emits frames distributions of the provided namespaces, one message per namespace. Useful for diagnostic purposes. Counts are reset every 500 ms.
   rpc SubscribeToFramesDistribution (FramesDistributionConfig) returns (stream FramesDistribution) {
     option (google.api.http) = {
       post: "/v1/SubscribeToFramesDistribution/"
@@ -77,7 +77,10 @@ message SubscriberWithScriptConfig {
 
 message FramesDistributionConfig {
   /// Name of the namespace from which we wish to subscribe to frames distributions.
+  /// Deprecated in favour of `namespaces`; kept for backwards compatibility. Setting both fields is an error.
   NameSpace namespace = 1;
+  /// Names of the namespaces from which we wish to subscribe to frames distributions.
+  repeated NameSpace namespaces = 2;
 }
 
 message CountByFrameId {
@@ -87,6 +90,8 @@ message CountByFrameId {
 
 message FramesDistribution {
   repeated CountByFrameId countsByFrameId = 1;
+  /// Namespace the counts belong to.
+  NameSpace namespace = 2;
 }
 
 /// List of signal identifiers

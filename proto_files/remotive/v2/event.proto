@@ -34,6 +34,22 @@ service EventService {
       body: "*"
     };
   }
+  /// The current sender state of every selected message — the same content a subscription delivers as its
+  /// baseline, without opening a stream. Same selector semantics as SubscribeSenderCommand.
+  rpc GetSenderState(GetSenderStateRequest) returns (GetSenderStateResponse) {
+    option (google.api.http) = {
+      post: "/v2/Event/GetSenderState/"
+      body: "*"
+    };
+  }
+}
+
+message GetSenderStateRequest {
+  repeated MessageSelector selectors = 1;
+}
+
+message GetSenderStateResponse {
+  repeated can.CanSenderConfig can = 1;
 }
 
 message UpdateEventsChannelResponse {
@@ -54,6 +70,13 @@ message Event {
   oneof event {
     ReceivedMessage message = 1;
     common.Error error = 2;
+    /// The baseline: the current sender state of every selected CAN frame, delivered once when the
+    /// subscription is established. All later changes arrive as canSenderUpdate deltas.
+    can.CanSenderSnapshot canSenderSnapshot = 3;
+    /// A delta to merge into the client's view, signal by signal: entries carry only the changed signals,
+    /// frames in the removed list are dropped entirely, and an entry's cycleTime is set only when it
+    /// changed. Frames newly covered by widening the subscription arrive as full entries.
+    can.CanSenderUpdate canSenderUpdate = 4;
   }
 }
 
@@ -75,7 +98,34 @@ message SubscribeCommands {
 message SubscribeCommand {
   oneof command {
     SubscribeMessageCommand subscribeMessageCommand = 1;
+    SubscribeSenderCommand subscribeSenderCommand = 2;
   }
+}
+
+/// One protocol's selection of messages.
+message MessageSelector {
+  oneof selector {
+    can.CanFrameSelector can = 1;
+    /// Every message in every namespace, on every protocol.
+    google.protobuf.Empty all = 2;
+  }
+}
+
+/// Subscribe to, or unsubscribe from, the broker's sender state on the event stream. The subscribing command
+/// that establishes the stream's subscription delivers a snapshot baseline of the selected messages, one
+/// event per protocol; later changes arrive as deltas.
+message SubscribeSenderCommand {
+  /// How this command changes the subscription for the selected messages. UPDATE (the default) widens the
+  /// subscription — the newly covered messages arrive as a delta. SET replaces the selection for the
+  /// namespaces named by the selectors with exactly these messages. REMOVE unsubscribes the selected
+  /// messages. Messages a SET or REMOVE stops covering arrive in a delta's removed list. The type applies
+  /// per namespace named by the selectors; namespaces not named are left untouched — except with the `all`
+  /// selector, which names every namespace, so SET with `all` replaces the entire subscription and REMOVE
+  /// with `all` unsubscribes everything.
+  SubscribeCommandType type = 1;
+  /// Messages to act on, in one or more protocols. A CAN selector with no frameId targets every frame in
+  /// that namespace.
+  repeated MessageSelector selectors = 2;
 }
 
 message SubscribeMessageCommand {

@@ -6,11 +6,47 @@ import "google/api/annotations.proto";
 import "remotive/v2/common.proto";
 
 service CanService {
-  /// Send a CAN frame with the specified signals. The frame will be sent immediately and will not be repeated.
-  /// Use ModelService to define messages that should be sent repeatedly.
+  /// Write a CAN frame, and set the values and cycle time the broker uses for it from now on. The given
+  /// signal values are merged into the frame's sender state; signals the sender state does not yet hold
+  /// start at their signal-database start value, so a frame can be sent with only the signals you care
+  /// about.
+  ///
+  /// The frame is written to the bus immediately, unless it is already being written cyclically with an
+  /// unchanged cycle time — then the new values are picked up on its next cycle instead, leaving the
+  /// schedule undisturbed. Sending a frame that is already cycling is therefore how you update it.
+  ///
+  /// A frame is written until StopSending: signal values never run out, since a signal with no loop values
+  /// loops on its signal-database start value (see common.SenderSignal).
+  ///
+  /// Set mode to DIRECT to write the given values straight to the bus once, without reading or changing the
+  /// frame's sender state. A DIRECT write emits a single frame, so each signal must carry at most one value —
+  /// one `once` value or one `loop` value — and cycleTime must be unset.
+  ///
+  /// A value for the frame's raw signal id must be raw bytes; it is decoded and stored as the frame's
+  /// individual signals. E2E-protected signals are broker-managed and ignored in SENDER mode.
   rpc SendFrame (SendFrameRequest) returns (SendMessageResponse) {
     option (google.api.http) = {
       post: "/v2/Can/SendFrame/"
+      body: "*"
+    };
+  }
+
+  /// Stop writing the selected frames and discard their stored values. Subscribers see the frames in the
+  /// removed list of a canSenderUpdate.
+  rpc StopSending (StopSendingRequest) returns (StopSendingResponse) {
+    option (google.api.http) = {
+      post: "/v2/Can/StopSending/"
+      body: "*"
+    };
+  }
+
+  /// Bidirectional stream carrying both write commands. This is the way to drive frames at a high rate:
+  /// each sendFrame updates its frame, and a cyclic frame keeps its own schedule throughout. Only failures
+  /// are reported back, one message per rejected command; a command that succeeds produces nothing, and a
+  /// rejected command does not close the stream.
+  rpc CommandStream (stream CanCommand) returns (stream CanCommandError) {
+    option (google.api.http) = {
+      post: "/v2/Can/CommandStream/"
       body: "*"
     };
   }
@@ -25,12 +61,84 @@ message CanFrameHeader {
   CanFrameAddress address = 1;
 }
 
+/// Selects CAN frames at three granularities: with both fields set it selects one frame, with frameId
+/// omitted every frame in the namespace, and with both omitted every CAN frame in every namespace. Setting
+/// frameId without namespaceId is an error.
+message CanFrameSelector {
+  optional uint32 namespaceId = 1;
+  optional uint32 frameId = 2;
+}
+
+/// How a send interacts with the frame's sender state: its stored signal values and its schedule.
+enum SendMode {
+  /// Merge the given values into the frame's sender state and write the frame from it. Signals you leave out
+  /// take their stored values, cycleTime applies, and subscribers see the change. The default.
+  SENDER = 0;
+  /// Write the given values straight to the bus, once, without reading or changing the sender state. Signals
+  /// you leave out are not set at all — the payload starts as the frame's empty payload, not as its stored
+  /// or start values — and a frame that is being written cyclically keeps both its schedule and its stored
+  /// values, so this frame is injected between two cyclic writes. cycleTime must be unset and each signal
+  /// must carry at most one value.
+  DIRECT = 1;
+}
+
 message SendFrameRequest {
   CanFrameHeader header = 1;
-  repeated common.MessageSignalValue signals = 2;
+  /// The signals to write. In DIRECT mode each signal must carry at most one value.
+  repeated common.SenderSignal signals = 2;
+  /// Cycle time in whole milliseconds, applied from this write on. It overrides both the signal database's
+  /// cycle time and any cycle time set by an earlier SendFrame. 0 writes the frame once and stops any
+  /// ongoing cyclic writing. Omit to keep the frame's current cycle time — for a frame not in the sender
+  /// state that is the signal database's cycle time, or a single write if the database has none.
+  /// Must be unset when mode is DIRECT.
+  optional uint32 cycleTime = 3;
+  /// Whether this write goes through the frame's sender state or straight to the bus. Defaults to SENDER.
+  SendMode mode = 4;
 }
 
 message SendMessageResponse {
   common.Result result = 1;
 }
 
+message StopSendingRequest {
+  repeated CanFrameSelector addresses = 1;
+}
+
+message StopSendingResponse {
+  common.Result result = 1;
+}
+
+/// One CAN write command, for the CommandStream.
+message CanCommand {
+  oneof command {
+    SendFrameRequest sendFrame = 1;
+    StopSendingRequest stopSending = 2;
+  }
+}
+
+/// A rejected command. Successful commands produce nothing.
+message CanCommandError {
+  common.Error error = 1;
+}
+
+/// A CAN frame's sender state: its address, its signal value sequences, and how often it is written.
+message CanSenderConfig {
+  CanFrameAddress address = 1;
+  repeated common.SenderSignal signals = 2;
+  /// Cycle time in whole milliseconds; 0 means the frame is only written once on SendFrame.
+  optional uint32 cycleTime = 3;
+}
+
+/// The full current state of every selected frame. Carried by the canSenderSnapshot event. A snapshot never
+/// removes anything from the client's view.
+message CanSenderSnapshot {
+  repeated CanSenderConfig entries = 1;
+}
+
+/// What changed since the previous event. Carried by the canSenderUpdate event.
+message CanSenderUpdate {
+  /// Changed frames. Entries carry only the changed signals, and cycleTime is set only when it changed.
+  repeated CanSenderConfig entries = 1;
+  /// Frames that left the sender state through StopSending.
+  repeated CanFrameAddress removed = 2;
+}
