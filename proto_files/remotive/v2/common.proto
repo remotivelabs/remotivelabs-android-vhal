@@ -30,7 +30,7 @@ message Value {
   }
 }
 
-/// A signal held for writing by the broker. The broker keeps the value for a signal and writes it to the bus
+/// A signal held for writing by the broker. The broker keeps the value for a signal and writes it to the channel
 /// when the message it belongs to is written. Every write emits one value: the `once` values first, one per
 /// write, then the `loop` values, one per write, restarting from the beginning of the loop. A single static
 /// value is expressed as one loop value.

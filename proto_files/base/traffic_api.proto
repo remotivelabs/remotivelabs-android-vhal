@@ -46,9 +46,9 @@ message PlaybackMode {
   uint64 startTime = 6;              /// Start time in monotonic micro seconds.
   uint64 endTime = 7;                /// End time in monotonic micro seconds.
   int64 timeDeviation = 8;           /// Time deviation in micro seconds, measured by server.
-  int64 offsetWallClockVsSample = 9; /// Signal and wall clock offset. Signals might have a seperate timestamp.
+  int64 offsetWallClockVsSample = 9; /// Signal and wall clock offset. Signals might have a separate timestamp.
   bool noPlaybackToApplication = 10; /// Allows disabling of data flow from recording to application layers. Default is set to false.
-  bool playbackToBus = 11;           /// Let data to be replayed to the bus specified in intefaces.json. Defalt set to false.
+  bool playbackToBus = 11;           /// Let data be replayed to the channel specified in interfaces.json. Default set to false.
 }
 
 /// Information about all playbacks and recordings.
@@ -58,9 +58,9 @@ message PlaybackInfos {
 }
 
 /**
- * Information about name space and file associated with playback or recording.
+ * Information about namespace and file associated with playback or recording.
  * Playback will play signals on namespace. Recordings will record all signals
- * on name space.
+ * on namespace.
  */
 message PlaybackConfig {
   FileDescription fileDescription = 1;  /// File information.
@@ -69,7 +69,7 @@ message PlaybackConfig {
 
 /// Information about a playback or a recording.
 message PlaybackInfo {
-  PlaybackConfig playbackConfig = 1;    /// File and name space information.
+  PlaybackConfig playbackConfig = 1;    /// File and namespace information.
   PlaybackMode playbackMode = 2;        /// Current mode.
 }
 

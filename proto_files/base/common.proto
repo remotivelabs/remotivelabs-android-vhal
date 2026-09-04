@@ -24,7 +24,7 @@ message ClientId {
 /// Identifier for a signal.
 message SignalId {
   string name = 1;          /// Name of signal.
-  NameSpace namespace = 2;  /// Which name space signal belongs in.
+  NameSpace namespace = 2;  /// Which namespace the signal belongs in.
 }
 
 /// Information about a signal. Including name and all meta data fields.
@@ -99,9 +99,9 @@ message MetaData {
     int32 startBit = 23;                 /// Signal start bit in frame
 }
 
-/// Identifier for a name space.
+/// Identifier for a namespace.
 message NameSpace {
-  string name = 1; /// Name of name space, which in turn is typically redirected in interfaces.json to an electrical interface.
+  string name = 1; /// Name of the namespace, which in turn is typically redirected in interfaces.json to a device.
 }
 
 message Namespaces {
@@ -110,7 +110,7 @@ message Namespaces {
 
 /// Information about network
 message NetworkInfo {
-  NameSpace namespace = 1;              /// Corresponding name space.
+  NameSpace namespace = 1;              /// Corresponding namespace.
   string type = 2;                      /// Type of network as text. Eg "can", "lin" etc.
   string description = 3;               /// Description text about network.
 }

@@ -119,7 +119,7 @@ message Signal {
   oneof payload {
     int64 integer = 2;      /// Value with integer type (int64).
     double double = 3;      /// Floating point data type (double).
-    bool arbitration = 4;   /// Exclusive for LIN bus, present as true when a header is presented on the bus.
+    bool arbitration = 4;   /// Exclusive for LIN, present as true when a header is presented on the channel.
     bool empty = 6;         /// No data supplied.
     /// (Supports publishing signals with named values or raw signals.
     /// - If the signal has named values, the provided value must exactly match a defined name (case-sensitive).

@@ -11,14 +11,14 @@ service CanService {
   /// start at their signal-database start value, so a frame can be sent with only the signals you care
   /// about.
   ///
-  /// The frame is written to the bus immediately, unless it is already being written cyclically with an
+  /// The frame is written to the channel immediately, unless it is already being written cyclically with an
   /// unchanged cycle time — then the new values are picked up on its next cycle instead, leaving the
   /// schedule undisturbed. Sending a frame that is already cycling is therefore how you update it.
   ///
   /// A frame is written until StopSending: signal values never run out, since a signal with no loop values
   /// loops on its signal-database start value (see common.SenderSignal).
   ///
-  /// Set mode to DIRECT to write the given values straight to the bus once, without reading or changing the
+  /// Set mode to DIRECT to write the given values straight to the channel once, without reading or changing the
   /// frame's sender state. A DIRECT write emits a single frame, so each signal must carry at most one value —
   /// one `once` value or one `loop` value — and cycleTime must be unset.
   ///
@@ -74,7 +74,7 @@ enum SendMode {
   /// Merge the given values into the frame's sender state and write the frame from it. Signals you leave out
   /// take their stored values, cycleTime applies, and subscribers see the change. The default.
   SENDER = 0;
-  /// Write the given values straight to the bus, once, without reading or changing the sender state. Signals
+  /// Write the given values straight to the channel, once, without reading or changing the sender state. Signals
   /// you leave out are not set at all — the payload starts as the frame's empty payload, not as its stored
   /// or start values — and a frame that is being written cyclically keeps both its schedule and its stored
   /// values, so this frame is injected between two cyclic writes. cycleTime must be unset and each signal
@@ -92,7 +92,7 @@ message SendFrameRequest {
   /// state that is the signal database's cycle time, or a single write if the database has none.
   /// Must be unset when mode is DIRECT.
   optional uint32 cycleTime = 3;
-  /// Whether this write goes through the frame's sender state or straight to the bus. Defaults to SENDER.
+  /// Whether this write goes through the frame's sender state or straight to the channel. Defaults to SENDER.
   SendMode mode = 4;
 }
 
