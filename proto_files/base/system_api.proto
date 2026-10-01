@@ -166,6 +166,10 @@ message Configuration {
     string topologyInstanceId = 9;
     /// Identifier for when the topology instance was generated
     string topologyGenerateId = 10;
+    /// Identifier for this run of the topology, new each time the topology broker starts. Empty on other brokers.
+    string topologySessionId = 11;
+    /// Workspace the topology was generated from. Empty on other brokers, or when generated without a workspace.
+    string topologyWorkspace = 12;
 }
 
 /// Response from reload request.
